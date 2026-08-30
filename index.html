@@ -696,7 +696,9 @@ const CARD_LIBRARY = [
       </circle>`).join('')}
       <line x1="185" y1="30" x2="20" y2="120" stroke="#ffd93d" stroke-width="3" opacity="0.5" stroke-dasharray="6 6"/>
       <rect x="0" y="140" width="220" height="20" fill="#8fe08a"/>
-    </svg>`,    // Sneaker sliding with heat/spark trail — friction
+    </svg>`,
+
+    // Sneaker sliding with heat/spark trail — friction
     friction: `<svg viewBox="0 0 220 160" width="100%" height="100%">
       <rect x="0" y="130" width="220" height="14" fill="#c9b8f0"/>
       <g>
@@ -1045,7 +1047,8 @@ const CARD_LIBRARY = [
     <circle cx="190" cy="105" r="5" fill="#ff9f43"/>
   </svg>`,
 
-  // Induction coil creating a changing field that heats a pot  induction: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+  // Induction coil creating a changing field that heats a pot
+  induction: `<svg viewBox="0 0 220 160" width="100%" height="100%">
     <rect x="30" y="105" width="160" height="14" rx="4" fill="#7089c4" stroke="${STROKE}" stroke-width="3"/>
     <path d="M50,105 q0,-20 20,-20 t20,20 t20,-20 t20,20 t20,-20 t20,20" fill="none" stroke="#8b5fd1" stroke-width="4">
       <animate attributeName="opacity" values="0.5;1;0.5" dur="1s" repeatCount="indefinite"/>
@@ -1393,7 +1396,9 @@ const CARD_LIBRARY = [
     ${[0,1].map(i=>`<path d="M${95+i*25},150 q6,-14 -2,-26 q10,6 6,24" fill="none" stroke="#c9d6e0" stroke-width="3" stroke-linecap="round">
       <animate attributeName="opacity" values="0.9;0.2;0.9" dur="1.6s" begin="${i*0.3}s" repeatCount="indefinite"/>
     </path>`).join('')}
-  </svg>`,  // Split scene: snow and frost on one side, sun and rain on the other
+  </svg>`,
+
+  // Split scene: snow and frost on one side, sun and rain on the other
   seasons: `<svg viewBox="0 0 220 160" width="100%" height="100%">
     <rect x="0" y="0" width="110" height="160" fill="#dceeff"/>
     <rect x="110" y="0" width="110" height="160" fill="#fff3d6"/>
@@ -1792,7 +1797,8 @@ Q = L*m (парообразование/конденсация); Q = q*m (сго
       reply: "Тепло само переходит от горячего к холодному — от чая к металлу ложки. Металл хорошо проводит тепло, поэтому оно быстро добирается от опущенного в чай кончика до твоих пальцев на ручке. 🥄 В формуле Q это количество теплоты, c — удельная теплоёмкость вещества, m — масса, ΔT — изменение температуры.",
       animationType: "conduction",
       caption: "Ложка в стакане",
-      formula: "Q = c·m·ΔT"    },
+      formula: "Q = c·m·ΔT"
+    },
     "Почему ручка кастрюли из дерева меньше обжигает?": {
       reply: "Дерево, в отличие от металла, очень плохо проводит тепло — оно почти не пропускает его дальше. Поэтому металлическая часть кастрюли раскаляется быстро, а деревянная ручка остаётся почти прохладной. 🪵 В формуле Q это количество теплоты, c — удельная теплоёмкость вещества, m — масса, ΔT — изменение температуры.",
       animationType: "comparison",
@@ -1991,7 +1997,8 @@ Q = L*m (парообразование/конденсация); Q = q*m (сго
       caption: "Батискаф всплывает",
       formula: "FA = ρ·g·V"
     },
-    "Почему индукционная плита греет посуду так быстро?": {      reply: "Плита создаёт быстро меняющееся магнитное поле прямо под дном посуды. Это поле само порождает электрический ток внутри металла кастрюли, и именно этот ток разогревает её. 🍳 В формуле ε это наведённое напряжение, ΔΦ — изменение магнитного потока, Δt — время этого изменения.",
+    "Почему индукционная плита греет посуду так быстро?": {
+      reply: "Плита создаёт быстро меняющееся магнитное поле прямо под дном посуды. Это поле само порождает электрический ток внутри металла кастрюли, и именно этот ток разогревает её. 🍳 В формуле ε это наведённое напряжение, ΔΦ — изменение магнитного потока, Δt — время этого изменения.",
       animationType: "induction",
       caption: "Индукционная плита",
       formula: "ε = -ΔΦ/Δt"
