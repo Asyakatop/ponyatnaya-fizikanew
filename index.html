@@ -1,0 +1,2273 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Понятная физика</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fbf9ff;
+    --card:#ffffff;
+    --ink:#2c1b4a;
+    --purple-900:#3b2160;
+    --purple-700:#6c3fb5;
+    --purple-600:#7c4fd0;
+    --purple-500:#8b5fd1;
+    --lilac-300:#c9b8f0;
+    --lilac-150:#e6dbfa;
+    --lilac-100:#efe6fb;
+    --ring-blue:#7089c4;
+    --ring-blue-dark:#4a5f96;
+    --pink:#c77dff;
+    --muted:#8b7ba8;
+    --line:#e7ddf7;
+    --sun:#ffc93c;
+    --fire:#ff7a3c;
+    --leaf:#5fc17a;
+    --water:#4fb3f0;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Nunito',sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  .view{display:none;}
+  .view.active{display:block;}
+
+  /* ---------- shared ---------- */
+  .pill-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:var(--lilac-150);
+    color:var(--purple-700);
+    border:none;
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:1.05rem;
+    padding:16px 34px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+    box-shadow:0 2px 0 rgba(108,63,181,0.08);
+  }
+  .pill-btn:hover{background:var(--lilac-300); transform:translateY(-2px); box-shadow:0 8px 20px rgba(108,63,181,.25);}
+  .pill-btn:active{transform:translateY(0);}
+  .pill-btn:focus-visible{outline:3px solid var(--purple-500); outline-offset:3px;}
+
+  /* ---------- LANDING ---------- */
+  .nav{
+    display:flex; align-items:center; justify-content:space-between;
+    max-width:1200px; margin:0 auto; padding:26px 32px 0;
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-family:'Baloo 2',sans-serif; font-weight:700; color:var(--purple-700); font-size:1.15rem;}
+  .brand-dot{width:12px;height:12px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #d9baff, var(--purple-600));}
+
+  .hero{
+    max-width:1200px; margin:0 auto; padding:50px 32px 30px;
+    display:grid; grid-template-columns:1.1fr 1fr; align-items:center; gap:24px;
+    position:relative;
+  }
+  .hero-glow{
+    position:absolute; left:8%; top:20%; width:420px; height:420px;
+    background:radial-gradient(circle, rgba(201,184,240,.55), transparent 70%);
+    filter:blur(10px); z-index:0; pointer-events:none;
+  }
+  .hero-copy{position:relative; z-index:1;}
+  h1.headline{
+    font-family:'Baloo 2',sans-serif;
+    font-weight:800;
+    font-size:clamp(2.6rem, 6vw, 4.6rem);
+    line-height:0.98;
+    color:var(--purple-700);
+    margin:0 0 22px;
+    letter-spacing:0.5px;
+    text-shadow:
+      2px 2px 0 rgba(255,255,255,.6),
+      0 6px 0 rgba(108,63,181,.14);
+  }
+  .subhead{
+    font-family:'Baloo 2',sans-serif;
+    font-weight:600;
+    font-size:clamp(1.1rem,2.1vw,1.4rem);
+    color:var(--purple-500);
+    line-height:1.4;
+    margin:0 0 34px;
+    max-width:480px;
+  }
+
+  /* ---------- atom icon (flat, recognizable) ---------- */
+  .atom-wrap{
+    position:relative; z-index:1;
+    height:380px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .atom-svg{width:min(360px,90%); height:auto; animation:atomFloat 5s ease-in-out infinite;}
+  @keyframes atomFloat{0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);}}
+
+  /* examples strip */
+  .examples{
+    max-width:1200px; margin:10px auto 0; padding:10px 32px 70px;
+  }
+  .examples-title{
+    font-family:'Baloo 2',sans-serif; font-weight:700; color:var(--purple-900);
+    font-size:1.4rem; margin:0 0 20px;
+  }
+  .example-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:18px;
+  }
+  .example-card{
+    background:var(--card); border:1px solid var(--line); border-radius:20px;
+    padding:22px 22px 24px; cursor:pointer; transition:transform .18s ease, box-shadow .18s ease;
+    text-align:left;
+  }
+  .example-card:hover{transform:translateY(-4px); box-shadow:0 14px 30px rgba(108,63,181,.15);}
+  .example-emoji{font-size:1.8rem; margin-bottom:10px; display:block;}
+  .example-q{font-family:'Baloo 2',sans-serif; font-weight:700; color:var(--purple-700); margin:0 0 6px; font-size:1.02rem;}
+  .example-a{color:var(--muted); font-size:.92rem; margin:0; line-height:1.4;}
+  .library-link{margin-top:22px;}
+
+  .footer{
+    text-align:center; padding:26px 20px 40px; color:var(--muted); font-size:.85rem;
+  }
+
+  @media (max-width:860px){
+    .hero{grid-template-columns:1fr; text-align:center;}
+    .hero-copy{display:flex; flex-direction:column; align-items:center;}
+    .subhead{max-width:100%;}
+    .atom-wrap{height:280px;}
+    .example-grid{grid-template-columns:1fr;}
+  }
+
+  /* ---------- LIBRARY ---------- */
+  .library-shell{max-width:900px; margin:0 auto; min-height:100vh;}
+  .library-content{padding:20px 18px 60px;}
+  .library-category{margin-bottom:28px;}
+  .library-category-title{
+    font-family:'Baloo 2',sans-serif; font-weight:700; color:var(--purple-700);
+    font-size:1.05rem; margin:0 0 12px;
+  }
+  .library-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:12px;}
+  .library-card{
+    background:#fff; border:1px solid var(--line); border-radius:14px;
+    padding:14px 16px; text-align:left; cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease;
+    display:flex; gap:10px; align-items:flex-start;
+  }
+  .library-card:hover{transform:translateY(-3px); box-shadow:0 10px 22px rgba(108,63,181,.14);}
+  .library-card-emoji{font-size:1.3rem; flex-shrink:0;}
+  .library-card-text{font-size:.86rem; color:var(--ink); font-weight:700; line-height:1.35;}
+
+  /* ---------- CHAT ---------- */
+  .chat-shell{
+    max-width:760px; margin:0 auto; min-height:100vh;
+    display:flex; flex-direction:column;
+  }
+  .chat-header{
+    display:flex; align-items:center; gap:14px;
+    padding:18px 20px; border-bottom:1px solid var(--line);
+    background:var(--bg); position:sticky; top:0; z-index:5;
+  }
+  .back-btn{
+    width:40px; height:40px; border-radius:50%; border:none;
+    background:var(--lilac-100); color:var(--purple-700); font-size:1.1rem;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; transition:background .15s ease;
+  }
+  .back-btn:hover{background:var(--lilac-300);}
+  .chat-title{font-family:'Baloo 2',sans-serif; font-weight:700; color:var(--purple-700); font-size:1.15rem; margin:0;}
+  .chat-sub{margin:2px 0 0; color:var(--muted); font-size:.82rem;}
+
+  .messages{
+    flex:1; padding:24px 18px 12px; display:flex; flex-direction:column; gap:18px;
+  }
+  .msg-row{display:flex; gap:10px; max-width:100%;}
+  .msg-row.user{justify-content:flex-end;}
+  .bubble{
+    max-width:82%; padding:14px 18px; border-radius:18px; line-height:1.5; font-size:.98rem;
+    font-weight:600;
+  }
+  .msg-row.user .bubble{
+    background:var(--purple-600); color:#fff; border-bottom-right-radius:6px;
+  }
+  .msg-row.assistant .bubble{
+    background:#fff; border:1px solid var(--line); color:var(--ink); border-bottom-left-radius:6px;
+  }
+  .assistant-block{display:flex; flex-direction:column; gap:10px; max-width:82%;}
+
+  .avatar{
+    width:34px; height:34px; border-radius:50%; flex-shrink:0;
+    background:radial-gradient(circle at 32% 28%, #f1e6ff, var(--pink) 25%, var(--purple-600) 70%);
+    box-shadow:inset -3px -4px 8px rgba(59,33,96,.4);
+  }
+
+  .scene-card{
+    background:linear-gradient(160deg, var(--lilac-100), #fff 70%);
+    border:1px solid var(--line); border-radius:18px; padding:14px;
+  }
+  .scene-caption{
+    font-family:'Baloo 2',sans-serif; font-weight:600; color:var(--purple-700);
+    font-size:.85rem; margin:10px 2px 0; text-align:center;
+  }
+  .scene-formula{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+    font-style:normal;
+    font-weight:700;
+    font-size:1.25rem;
+    letter-spacing:0.2px;
+    color:var(--purple-900);
+    background:#fff8e0;
+    border:2px dashed #f0d98c;
+    display:inline-block;
+    padding:4px 16px;
+    border-radius:10px;
+    transform:rotate(-1.5deg);
+    margin:8px auto 0;
+  }
+  .scene-formula-wrap{text-align:center;}
+  .scene-svg-wrap{
+    width:100%; height:170px; display:flex; align-items:center; justify-content:center; overflow:hidden;
+    border-radius:12px;
+  }
+
+  .typing{display:flex; gap:5px; padding:6px 4px;}
+  .typing span{width:7px; height:7px; border-radius:50%; background:var(--lilac-300); animation:tdot 1.1s infinite ease-in-out;}
+  .typing span:nth-child(2){animation-delay:.15s;}
+  .typing span:nth-child(3){animation-delay:.3s;}
+  @keyframes tdot{0%,60%,100%{transform:translateY(0); opacity:.5;} 30%{transform:translateY(-5px); opacity:1;}}
+
+  .composer{
+    padding:14px 16px 20px; border-top:1px solid var(--line); background:var(--bg);
+    position:sticky; bottom:0;
+  }
+  .chips{display:flex; gap:8px; overflow-x:auto; padding-bottom:12px; scrollbar-width:none;}
+  .chips::-webkit-scrollbar{display:none;}
+  .chip{
+    flex-shrink:0; background:var(--lilac-100); color:var(--purple-700); border:none;
+    padding:8px 14px; border-radius:999px; font-size:.82rem; font-family:'Nunito',sans-serif; font-weight:800;
+    cursor:pointer; white-space:nowrap; transition:background .15s ease;
+  }
+  .chip:hover{background:var(--lilac-300);}
+  .input-row{display:flex; gap:10px; align-items:flex-end;}
+  #chat-input{
+    flex:1; resize:none; border:1px solid var(--line); border-radius:16px;
+    padding:13px 16px; font-family:'Nunito',sans-serif; font-weight:700; font-size:.98rem; color:var(--ink);
+    max-height:120px; background:#fff;
+  }
+  #chat-input:focus{outline:2px solid var(--purple-500); outline-offset:1px;}
+  .send-btn{
+    width:48px; height:48px; border-radius:50%; border:none; flex-shrink:0;
+    background:var(--purple-600); color:#fff; font-size:1.15rem; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition:background .15s ease, transform .15s ease;
+  }
+  .send-btn:hover{background:var(--purple-700);}
+  .send-btn:disabled{background:var(--lilac-300); cursor:not-allowed;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001s !important; animation-iteration-count:1 !important; transition-duration:.001s !important;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== LANDING VIEW ===================== -->
+<div id="landing-view" class="view active">
+  <div class="nav">
+    <div class="brand"><span class="brand-dot"></span> Понятная физика</div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-copy">
+      <h1 class="headline">ПОНЯТНАЯ<br>ФИЗИКА</h1>
+      <p class="subhead">Физика — это не скучно! 🎈 Она прячется в супе, автобусе и даже в твоей чашке чая. Давай найдём её вместе!</p>
+      <button class="pill-btn" id="start-chat-btn">Начать чат! →</button>
+    </div>
+    <div class="atom-wrap" aria-hidden="true">
+      <svg class="atom-svg" viewBox="0 0 240 240">
+        <g transform="rotate(0 120 120)">
+          <ellipse cx="120" cy="120" rx="100" ry="38" fill="none" stroke="#7089c4" stroke-width="6"/>
+          <circle r="9" fill="#7089c4">
+            <animateMotion dur="3.2s" repeatCount="indefinite" path="M220,120 A100,38 0 1,1 20,120 A100,38 0 1,1 220,120"/>
+          </circle>
+        </g>
+        <g transform="rotate(60 120 120)">
+          <ellipse cx="120" cy="120" rx="100" ry="38" fill="none" stroke="#c77dff" stroke-width="6"/>
+          <circle r="9" fill="#c77dff">
+            <animateMotion dur="4s" repeatCount="indefinite" path="M220,120 A100,38 0 1,0 20,120 A100,38 0 1,0 220,120"/>
+          </circle>
+        </g>
+        <g transform="rotate(120 120 120)">
+          <ellipse cx="120" cy="120" rx="100" ry="38" fill="none" stroke="#8b5fd1" stroke-width="6"/>
+          <circle r="9" fill="#8b5fd1">
+            <animateMotion dur="3.6s" repeatCount="indefinite" path="M220,120 A100,38 0 1,1 20,120 A100,38 0 1,1 220,120"/>
+          </circle>
+        </g>
+        <circle cx="120" cy="120" r="30" fill="url(#nucleusGrad)"/>
+        <defs>
+          <radialGradient id="nucleusGrad" cx="35%" cy="30%" r="70%">
+            <stop offset="0%" stop-color="#f3e8ff"/>
+            <stop offset="35%" stop-color="#c77dff"/>
+            <stop offset="100%" stop-color="#6c3fb5"/>
+          </radialGradient>
+        </defs>
+      </svg>
+    </div>
+  </div>
+
+  <div class="examples">
+    <p class="examples-title">Спроси, например 👇</p>
+    <div class="example-grid">
+      <button class="example-card" data-q="Почему в кастрюле с супом сначала закипают края, а не середина?">
+        <span class="example-emoji">🍲</span>
+        <p class="example-q">Почему суп закипает по краям?</p>
+        <p class="example-a">Конвекция и теплопередача на кухне</p>
+      </button>
+      <button class="example-card" data-q="Почему когда автобус резко тормозит, пассажиров кидает вперёд?">
+        <span class="example-emoji">🚌</span>
+        <p class="example-q">Почему при торможении кидает вперёд?</p>
+        <p class="example-a">Инерция в общественном транспорте</p>
+      </button>
+      <button class="example-card" data-q="Почему ложка в стакане с водой выглядит сломанной?">
+        <span class="example-emoji">🥄</span>
+        <p class="example-q">Почему ложка в воде «ломается»?</p>
+        <p class="example-a">Преломление света на границе сред</p>
+      </button>
+    </div>
+    <button class="pill-btn library-link" id="open-library-btn">Смотреть все 42 темы →</button>
+  </div>
+
+  <div class="footer">Сайт-помощник для уроков физики — для учеников и учителей</div>
+</div>
+
+<!-- ===================== LIBRARY VIEW ===================== -->
+<div id="library-view" class="view">
+  <div class="library-shell">
+    <div class="chat-header">
+      <button class="back-btn" id="library-back-btn" aria-label="Назад">←</button>
+      <div>
+        <p class="chat-title">Все темы</p>
+        <p class="chat-sub">42 явления из жизни — нажми на любое</p>
+      </div>
+    </div>
+    <div class="library-content" id="library-content"></div>
+  </div>
+</div>
+
+<!-- ===================== CHAT VIEW ===================== -->
+<div id="chat-view" class="view">
+  <div class="chat-shell">
+    <div class="chat-header">
+      <button class="back-btn" id="back-btn" aria-label="Назад">←</button>
+      <div>
+        <p class="chat-title">Понятная физика</p>
+        <p class="chat-sub">Опиши ситуацию — покажу мультик и формулу 🔬</p>
+      </div>
+    </div>
+
+    <div class="messages" id="messages"></div>
+
+    <div class="composer">
+      <div class="chips" id="chips">
+        <button class="chip" data-q="Почему небо голубое?">Почему небо голубое?</button>
+        <button class="chip" data-q="Почему каблуки проваливаются в землю, а широкие лыжи — нет?">Почему каблуки проваливаются?</button>
+        <button class="chip" data-q="Почему батут подбрасывает человека вверх?">Почему батут подбрасывает вверх?</button>
+        <button class="chip" data-q="Почему лёд плавает, а не тонет?">Почему лёд плавает?</button>
+      </div>
+      <div class="input-row">
+        <textarea id="chat-input" rows="1" placeholder="Опиши ситуацию или явление..."></textarea>
+        <button class="send-btn" id="send-btn" aria-label="Отправить">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CARD_LIBRARY = [
+  {
+    category: "Кухня",
+    items: [
+      { q: "Почему вода в чайнике начинает кипеть?", emoji: "🫖", caption: "Чайник закипает" },
+      { q: "Почему металлическая ложка в горячем чае быстро нагревается?", emoji: "🥄", caption: "Ложка в стакане" },
+      { q: "Почему вытяжка над плитой работает сверху?", emoji: "💨", caption: "Вытяжка над плитой" },
+      { q: "Почему индукционная плита греет посуду так быстро?", emoji: "🍳", caption: "Индукционная плита" }
+    ]
+  },
+  {
+    category: "Дом и тепло",
+    items: [
+      { q: "Почему на крышке кастрюли появляются капли?", emoji: "💧", caption: "Пар на крышке" },
+      { q: "Почему зеркало в ванной запотевает?", emoji: "🪞", caption: "Запотевшее зеркало" },
+      { q: "Почему на холодной трубе появляются капли воды?", emoji: "🚰", caption: "Холодный кран" },
+      { q: "Почему ручка кастрюли из дерева меньше обжигает?", emoji: "🪵", caption: "Деревянная ручка" },
+      { q: "Почему батареи отопления ставят внизу комнаты?", emoji: "🔥", caption: "Батарея под окном" }
+    ]
+  },
+  {
+    category: "Погода и природа",
+    items: [
+      { q: "Почему лужа после дождя со временем исчезает?", emoji: "☀️", caption: "Испаряющаяся лужа" },
+      { q: "Почему зимой вода превращается в лёд?", emoji: "❄️", caption: "Вода замерзает" },
+      { q: "Почему после дождя на небе появляется радуга?", emoji: "🌈", caption: "Радуга" },
+      { q: "Почему сейсмограф может записать колебания земли?", emoji: "📈", caption: "Сейсмограф" },
+      { q: "Почему зимой идёт снег, а летом обычно нет?", emoji: "🌨️", caption: "Снег зимой, дождь летом" }
+    ]
+  },
+  {
+    category: "Опыты и измерения",
+    items: [
+      { q: "Почему воды в блюдце со временем становится меньше?", emoji: "🥣", caption: "Блюдце с горячей водой" },
+      { q: "Почему термометр не сразу показывает правильную температуру?", emoji: "🌡️", caption: "Термометр в воде" },
+      { q: "Почему лёд превращается в воду?", emoji: "🧊", caption: "Лёд тает" }
+    ]
+  },
+  {
+    category: "Движение и безопасность",
+    items: [
+      { q: "Почему мяч продолжает двигаться после толчка?", emoji: "⚽", caption: "Мяч катится" },
+      { q: "Почему ремень безопасности удерживает человека при резкой остановке?", emoji: "🚗", caption: "Ремень безопасности" },
+      { q: "Почему на мокром полу легче поскользнуться?", emoji: "💦", caption: "Скользкий пол" },
+      { q: "Почему кроссовки не так скользят, как гладкая подошва?", emoji: "👟", caption: "Резиновая подошва" },
+      { q: "Почему иногда бьёт током, когда касаешься дверной ручки?", emoji: "⚡", caption: "Искра у двери" },
+      { q: "Зачем бензовозу нужна цепь, касающаяся земли?", emoji: "🚛", caption: "Бензовоз и цепь" }
+    ]
+  },
+  {
+    category: "Силы и колебания",
+    items: [
+      { q: "Почему пружина возвращается в исходную форму?", emoji: "🌀", caption: "Пружина растянулась" },
+      { q: "Почему нельзя слишком сильно тянуть динамометр?", emoji: "⚙️", caption: "Динамометр" },
+      { q: "Почему качели двигаются туда-сюда?", emoji: "🛝", caption: "Качели" }
+    ]
+  },
+  {
+    category: "Звук",
+    items: [
+      { q: "Почему из колонки слышен звук?", emoji: "🔊", caption: "Колонка звучит" },
+      { q: "Почему в пустой комнате слышно эхо?", emoji: "🗣️", caption: "Эхо в пустой комнате" }
+    ]
+  },
+  {
+    category: "Гаджеты и связь",
+    items: [
+      { q: "Почему наушники превращают электрический сигнал в звук?", emoji: "🎧", caption: "Наушники" },
+      { q: "Как телефон получает сигнал без проводов?", emoji: "📶", caption: "Телефон ловит сигнал" },
+      { q: "Почему пульт от телевизора работает на расстоянии?", emoji: "📺", caption: "Пульт от телевизора" },
+      { q: "Почему камера может чётко сфокусировать изображение?", emoji: "📷", caption: "Объектив камеры" }
+    ]
+  },
+  {
+    category: "Магниты и электричество",
+    items: [
+      { q: "Почему магнит держится на дверце холодильника?", emoji: "🧲", caption: "Магнит на холодильнике" },
+      { q: "Почему волосы тянутся к воздушному шарику?", emoji: "🎈", caption: "Шарик и волосы" },
+      { q: "Почему лампочка начинает светиться после включения?", emoji: "💡", caption: "Лампочка светится" }
+    ]
+  },
+  {
+    category: "Быт",
+    items: [
+      { q: "Почему сумка закрывается на магнитную застёжку?", emoji: "👜", caption: "Магнитная застёжка" },
+      { q: "Почему пластмассовая расчёска притягивает волосы?", emoji: "💇", caption: "Расчёска и волосы" }
+    ]
+  },
+  {
+    category: "Свет и оптика",
+    items: [
+      { q: "Почему мы видим своё отражение в зеркале?", emoji: "🪞", caption: "Луч в зеркале" },
+      { q: "Почему ложка в стакане с водой выглядит изогнутой?", emoji: "🥄", caption: "Ложка в стакане кажется сломанной" }
+    ]
+  },
+  {
+    category: "Плавание тел",
+    items: [
+      { q: "Почему кораблик не тонет?", emoji: "⛵", caption: "Кораблик на воде" },
+      { q: "Почему после сброса груза батискаф всплывает?", emoji: "🌊", caption: "Батискаф всплывает" }
+    ]
+  },
+  {
+    category: "Человек и физика",
+    items: [
+      { q: "Почему жару легче переносить в сухом климате, чем во влажном?", emoji: "🥵", caption: "Сухая жара и влажная жара" }
+    ]
+  }
+];
+
+  const landing = document.getElementById('landing-view');
+  const chat = document.getElementById('chat-view');
+  const library = document.getElementById('library-view');
+  const messagesEl = document.getElementById('messages');
+  const input = document.getElementById('chat-input');
+  const sendBtn = document.getElementById('send-btn');
+
+  document.getElementById('start-chat-btn').addEventListener('click', () => {
+    landing.classList.remove('active');
+    chat.classList.add('active');
+    if (messagesEl.children.length === 0) greet();
+    input.focus();
+  });
+  document.getElementById('back-btn').addEventListener('click', () => {
+    chat.classList.remove('active');
+    landing.classList.add('active');
+  });
+  document.querySelectorAll('.example-card').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      landing.classList.remove('active');
+      chat.classList.add('active');
+      if (messagesEl.children.length === 0) greet();
+      sendMessage(btn.dataset.q);
+    });
+  });
+  document.querySelectorAll('.chip').forEach(btn=>{
+    btn.addEventListener('click', ()=> sendMessage(btn.dataset.q));
+  });
+
+  // ---------- library of all 42 topics ----------
+  let libraryRendered = false;
+  function renderLibrary(){
+    if(libraryRendered) return;
+    const container = document.getElementById('library-content');
+    CARD_LIBRARY.forEach(group=>{
+      const section = document.createElement('div');
+      section.className = 'library-category';
+      const title = document.createElement('p');
+      title.className = 'library-category-title';
+      title.textContent = group.category;
+      section.appendChild(title);
+      const grid = document.createElement('div');
+      grid.className = 'library-grid';
+      group.items.forEach(item=>{
+        const card = document.createElement('button');
+        card.className = 'library-card';
+        card.innerHTML = `<span class="library-card-emoji">${item.emoji}</span><span class="library-card-text">${item.caption}</span>`;
+        card.addEventListener('click', ()=>{
+          library.classList.remove('active');
+          chat.classList.add('active');
+          if (messagesEl.children.length === 0) greet();
+          sendMessage(item.q);
+        });
+        grid.appendChild(card);
+      });
+      section.appendChild(grid);
+      container.appendChild(section);
+    });
+    libraryRendered = true;
+  }
+  document.getElementById('open-library-btn').addEventListener('click', ()=>{
+    landing.classList.remove('active');
+    library.classList.add('active');
+    renderLibrary();
+  });
+  document.getElementById('library-back-btn').addEventListener('click', ()=>{
+    library.classList.remove('active');
+    landing.classList.add('active');
+  });
+
+
+  function greet(){
+    addAssistantText('Привет! 👋 Расскажи про любую ситуацию из жизни — а я объясню, какая физика в ней прячется, нарисую мультик и покажу формулу. Например: «почему сковородка шипит, когда на неё капает вода?» 🍳');
+  }
+
+  // ---------- conversation state ----------
+  let history = []; // {role, content}
+
+  sendBtn.addEventListener('click', () => sendMessage(input.value));
+  input.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter' && !e.shiftKey){
+      e.preventDefault();
+      sendMessage(input.value);
+    }
+  });
+  input.addEventListener('input', ()=>{
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+  });
+
+  function addUserBubble(text){
+    const row = document.createElement('div');
+    row.className = 'msg-row user';
+    row.innerHTML = `<div class="bubble"></div>`;
+    row.querySelector('.bubble').textContent = text;
+    messagesEl.appendChild(row);
+    scrollDown();
+  }
+
+  function addAssistantText(text){
+    const row = document.createElement('div');
+    row.className = 'msg-row assistant';
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    const block = document.createElement('div');
+    block.className = 'assistant-block';
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.textContent = text;
+    block.appendChild(bubble);
+    row.appendChild(avatar);
+    row.appendChild(block);
+    messagesEl.appendChild(row);
+    scrollDown();
+    return block;
+  }
+
+  function addTypingIndicator(){
+    const row = document.createElement('div');
+    row.className = 'msg-row assistant';
+    row.id = 'typing-row';
+    row.innerHTML = `<div class="avatar"></div><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+    messagesEl.appendChild(row);
+    scrollDown();
+  }
+  function removeTypingIndicator(){
+    const el = document.getElementById('typing-row');
+    if(el) el.remove();
+  }
+
+  function scrollDown(){
+    requestAnimationFrame(()=>{ messagesEl.scrollTop = messagesEl.scrollHeight; window.scrollTo(0, document.body.scrollHeight); });
+  }
+
+  // ---------- animation scenes: colorful, concrete, hand-drawn feel ----------
+  const STROKE = '#2c1b4a';
+
+  const SCENES = {
+    // Apple falling from a tree — gravity
+    gravity: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+      <rect x="0" y="130" width="220" height="30" fill="#8fe08a"/>
+      <rect x="20" y="40" width="16" height="95" fill="#a5722f" stroke="${STROKE}" stroke-width="3" rx="4"/>
+      <circle cx="30" cy="35" r="42" fill="#5fc17a" stroke="${STROKE}" stroke-width="3"/>
+      <circle cx="30" cy="20" r="10" fill="#ff5a5a" stroke="${STROKE}" stroke-width="3">
+        <animate attributeName="cy" values="20;20;125;20" keyTimes="0;0.35;0.7;1" dur="2.4s" repeatCount="indefinite"/>
+        <animate attributeName="cx" values="30;30;46;30" keyTimes="0;0.35;0.7;1" dur="2.4s" repeatCount="indefinite"/>
+      </circle>
+      <ellipse cx="46" cy="140" rx="16" ry="5" fill="#2c1b4a" opacity="0.15">
+        <animate attributeName="opacity" values="0;0;0.25;0" keyTimes="0;0.35;0.7;1" dur="2.4s" repeatCount="indefinite"/>
+      </ellipse>
+    </svg>`,
+
+    // Swing set — pendulum
+    pendulum: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+      <rect x="0" y="140" width="220" height="20" fill="#8fe08a"/>
+      <line x1="40" y1="140" x2="80" y2="20" stroke="#a5722f" stroke-width="8" stroke-linecap="round"/>
+      <line x1="180" y1="140" x2="140" y2="20" stroke="#a5722f" stroke-width="8" stroke-linecap="round"/>
+      <line x1="80" y1="20" x2="140" y2="20" stroke="#a5722f" stroke-width="8" stroke-linecap="round"/>
+      <g>
+        <animateTransform attributeName="transform" type="rotate" values="30 110 20; -30 110 20; 30 110 20" dur="2.6s" repeatCount="indefinite"/>
+        <line x1="110" y1="20" x2="110" y2="95" stroke="#7089c4" stroke-width="3"/>
+        <rect x="96" y="95" width="28" height="10" rx="4" fill="#ff9f43" stroke="${STROKE}" stroke-width="2.5"/>
+        <circle cx="110" cy="80" r="13" fill="#ffd27a" stroke="${STROKE}" stroke-width="2.5"/>
+      </g>
+    </svg>`,
+
+    // Speaker with sound waves
+    wave: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+      <rect x="30" y="55" width="34" height="50" rx="6" fill="#8b5fd1" stroke="${STROKE}" stroke-width="3"/>
+      <circle cx="47" cy="80" r="10" fill="#efe6fb" stroke="${STROKE}" stroke-width="2.5"/>
+      ${[0,1,2].map(i=>`<path d="M ${80+i*25} ${55-i*8} A ${40+i*22} ${40+i*22} 0 0 1 ${80+i*25} ${105+i*8}" fill="none" stroke="${['#ff9f43','#ffd93d','#c77dff'][i]}" stroke-width="5" stroke-linecap="round">
+        <animate attributeName="opacity" values="0;1;0" dur="1.8s" begin="${i*0.3}s" repeatCount="indefinite"/>
+      </path>`).join('')}
+    </svg>`,
+
+    // Glass with spoon bending at waterline — refraction
+    refraction: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+      <path d="M70,30 L75,140 Q110,150 145,140 L150,30 Z" fill="none" stroke="${STROKE}" stroke-width="3.5"/>
+      <path d="M73,80 L147,80 L145,140 Q110,150 75,140 Z" fill="#4fb3f0" opacity="0.55"/>
+      <line x1="73" y1="80" x2="147" y2="80" stroke="#2b8fd0" stroke-width="2"/>
+      <line x1="90" y1="15" x2="110" y2="80" stroke="#a5722f" stroke-width="7" stroke-linecap="round"/>
+      <line x1="110" y1="80" x2="130" y2="128" stroke="#a5722f" stroke-width="7" stroke-linecap="round" opacity="0.55"/>
+      <line x1="110" y1="80" x2="95" y2="128" stroke="#a5722f" stroke-width="7" stroke-linecap="round">
+        <animate attributeName="opacity" values="1;0.4;1" dur="1.8s" repeatCount="indefinite"/>
+      </line>
+    </svg>`,
+
+    // Sun scattering blue light through the sky
+    scattering: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+      <rect x="0" y="0" width="220" height="160" fill="#dff0fe"/>
+      <circle cx="185" cy="30" r="20" fill="#ffc93c" stroke="${STROKE}" stroke-width="3"/>
+      ${[0,1,2,3,4,5].map(i=>`<circle cx="${40+i*30}" cy="${20+ (i%2)*10}" r="5" fill="#4fb3f0">
+        <animate attributeName="cy" values="${20+(i%2)*10};${100+(i%2)*10};${20+(i%2)*10}" dur="${2+i*0.2}s" begin="${i*0.15}s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.2;1;0.2" dur="${2+i*0.2}s" begin="${i*0.15}s" repeatCount="indefinite"/>
+      </circle>`).join('')}
+      <line x1="185" y1="30" x2="20" y2="120" stroke="#ffd93d" stroke-width="3" opacity="0.5" stroke-dasharray="6 6"/>
+      <rect x="0" y="140" width="220" height="20" fill="#8fe08a"/>
+    </svg>`,
+
+    // Sneaker sliding with heat/spark trail — friction
+    friction: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+      <rect x="0" y="130" width="220" height="14" fill="#c9b8f0"/>
+      <g>
+        <animate attributeName="opacity" values="1" dur="1s"/>
+        <path d="M20,120 h50 q10,0 10,-14 v-6 h-46 q-14,0 -14,10 z" fill="#ff9f43" stroke="${STROKE}" stroke-width="3">
+          <animate attributeName="d" values="
+            M20,120 h50 q10,0 10,-14 v-6 h-46 q-14,0 -14,10 z;
+            M120,120 h50 q10,0 10,-14 v-6 h-46 q-14,0 -14,10 z;
+            M120,120 h50 q10,0 10,-14 v-6 h-46 q-14,0 -14,10 z"
+            keyTimes="0;0.6;1" dur="2.2s" repeatCount="indefinite" calcMode="spline" keySplines="0.15 0.6 0.4 1;0 0 0 0"/>
+        </path>
+      </g>
+      ${[0,1,2].map(i=>`<line x1="${10+i*8}" y1="${118-i*6}" x2="${0+i*8}" y2="${118-i*6}" stroke="#ff5a5a" stroke-width="3" stroke-linecap="round">
+        <animate attributeName="opacity" values="0;0;1;0" keyTimes="0;0.55;0.65;1" dur="2.2s" repeatCount="indefinite"/>
+        <animate attributeName="x1" values="10;110;110" keyTimes="0;0.6;1" dur="2.2s" repeatCount="indefinite"/>
+        <animate attributeName="x2" values="0;100;100" keyTimes="0;0.6;1" dur="2.2s" repeatCount="indefinite"/>
+      </line>`).join('')}
+    </svg>`,
+
+    // Pot boiling on a stove — matches the user's own reference video
+    heat: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+      <rect x="60" y="120" width="100" height="14" rx="4" fill="#7089c4" stroke="${STROKE}" stroke-width="3"/>
+      <path d="M85,105 q5,-14 -3,-22 q10,4 10,18 M110,105 q5,-18 -4,-28 q12,5 12,24 M133,105 q5,-14 -3,-22 q10,4 10,18"
+        fill="#ff7a3c" stroke="${STROKE}" stroke-width="2.5">
+        <animate attributeName="d" values="
+          M85,105 q5,-14 -3,-22 q10,4 10,18 M110,105 q5,-18 -4,-28 q12,5 12,24 M133,105 q5,-14 -3,-22 q10,4 10,18;
+          M85,105 q7,-20 -2,-28 q12,6 8,24 M110,105 q6,-24 -5,-34 q14,7 13,30 M133,105 q7,-20 -2,-28 q12,6 8,24;
+          M85,105 q5,-14 -3,-22 q10,4 10,18 M110,105 q5,-18 -4,-28 q12,5 12,24 M133,105 q5,-14 -3,-22 q10,4 10,18"
+          dur="0.6s" repeatCount="indefinite"/>
+      </path>
+      <path d="M55,50 h110 v50 q0,20 -55,20 q-55,0 -55,-20 z" fill="#dff0fe" stroke="${STROKE}" stroke-width="3.5"/>
+      <rect x="35" y="55" width="18" height="10" rx="5" fill="#c9b8f0" stroke="${STROKE}" stroke-width="2.5"/>
+      <rect x="167" y="55" width="18" height="10" rx="5" fill="#c9b8f0" stroke="${STROKE}" stroke-width="2.5"/>
+      <path d="M58,70 h104 v32 q0,16 -52,16 q-52,0 -52,-16 z" fill="#4fb3f0"/>
+      ${[0,1,2,3].map(i=>`<circle cx="${75+i*22}" cy="95" r="4" fill="#e8f7ff">
+        <animate attributeName="cy" values="95;60;95" dur="${1.1+i*0.15}s" begin="${i*0.2}s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="1;1;0" dur="${1.1+i*0.15}s" begin="${i*0.2}s" repeatCount="indefinite"/>
+      </circle>`).join('')}
+      ${[0,1].map(i=>`<path d="M${90+i*40},48 q6,-10 0,-18 q6,7 0,18" fill="none" stroke="#c9d6e0" stroke-width="3" stroke-linecap="round">
+        <animate attributeName="opacity" values="0;0.9;0" dur="1.6s" begin="${i*0.5}s" repeatCount="indefinite"/>
+        <animate attributeName="d" values="M${90+i*40},48 q6,-10 0,-18 q6,7 0,18;M${90+i*40},38 q6,-10 0,-18 q6,7 0,18;M${90+i*40},48 q6,-10 0,-18 q6,7 0,18" dur="1.6s" begin="${i*0.5}s" repeatCount="indefinite"/>
+      </path>`).join('')}
+    </svg>`,
+
+    // Bulb + battery circuit — electricity
+    electricity: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+      <rect x="20" y="70" width="34" height="20" rx="3" fill="#5fc17a" stroke="${STROKE}" stroke-width="3"/>
+      <rect x="16" y="76" width="6" height="8" fill="${STROKE}"/>
+      <rect x="52" y="74" width="6" height="12" fill="${STROKE}"/>
+      <path d="M54,70 V40 H166 V70" fill="none" stroke="${STROKE}" stroke-width="3"/>
+      <path d="M54,90 V120 H166 V90" fill="none" stroke="${STROKE}" stroke-width="3"/>
+      <circle cx="166" cy="80" r="24" fill="#fff7d6" stroke="${STROKE}" stroke-width="3"/>
+      <path d="M156,88 l8,-16 l4,10 l6,-12" fill="none" stroke="#ff9f43" stroke-width="3" stroke-linecap="round">
+        <animate attributeName="stroke" values="#ffd93d;#ff9f43;#ffd93d" dur="0.9s" repeatCount="indefinite"/>
+      </path>
+      <circle cx="166" cy="80" r="24" fill="#ffd93d" opacity="0">
+        <animate attributeName="opacity" values="0;0.35;0" dur="0.9s" repeatCount="indefinite"/>
+      </circle>
+      <circle r="5" fill="#c77dff">
+        <animateMotion dur="2.6s" repeatCount="indefinite" path="M54,40 H166 V40 M166,40 V120 H54 V40"/>
+      </circle>
+    </svg>`,
+
+    // Ice cube floating in a glass of water — buoyancy
+    buoyancy: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+      <path d="M65,25 L72,140 Q110,150 148,140 L155,25 Z" fill="none" stroke="${STROKE}" stroke-width="3.5"/>
+      <path d="M68,60 L152,60 L148,140 Q110,150 72,140 Z" fill="#4fb3f0" opacity="0.6"/>
+      <g>
+        <animate attributeName="opacity" values="1" dur="1s"/>
+        <rect x="90" y="48" width="40" height="34" rx="6" fill="#cdeeff" stroke="${STROKE}" stroke-width="3">
+          <animate attributeName="y" values="46;54;46" dur="2.4s" repeatCount="indefinite"/>
+        </rect>
+        <rect x="97" y="54" width="10" height="8" rx="2" fill="#ffffff" opacity="0.8">
+          <animate attributeName="y" values="52;60;52" dur="2.4s" repeatCount="indefinite"/>
+        </rect>
+      </g>
+      <line x1="68" y1="60" x2="152" y2="60" stroke="#2b8fd0" stroke-width="2"/>
+    </svg>`,
+
+    // Horseshoe magnet attracting a paperclip — magnetism
+    magnetism: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+      <path d="M50,40 v50 a35,35 0 0 0 70,0 v-50" fill="none" stroke="${STROKE}" stroke-width="16" stroke-linecap="round"/>
+      <path d="M50,40 v50 a35,35 0 0 0 70,0 v-50" fill="none" stroke="#ff5a5a" stroke-width="10" stroke-linecap="round" stroke-dasharray="20 200"/>
+      <rect x="42" y="30" width="16" height="16" fill="#ff5a5a" stroke="${STROKE}" stroke-width="2"/>
+      <rect x="112" y="30" width="16" height="16" fill="#4fb3f0" stroke="${STROKE}" stroke-width="2"/>
+      <rect x="150" y="70" width="45" height="9" rx="4" fill="#c9c9c9" stroke="${STROKE}" stroke-width="2.5">
+        <animate attributeName="x" values="150;125;150" dur="2s" repeatCount="indefinite"/>
+      </rect>
+      ${[0,1,2].map(i=>`<path d="M140,${55+i*15} q15,${5-i*5} 30,0" fill="none" stroke="#c77dff" stroke-width="2.5" stroke-dasharray="4 4">
+        <animate attributeName="opacity" values="0.2;0.9;0.2" dur="1.4s" begin="${i*0.2}s" repeatCount="indefinite"/>
+      </path>`).join('')}
+    </svg>`,
+
+    // Bus braking, passenger tips forward — inertia
+    inertia: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+      <rect x="0" y="130" width="220" height="10" fill="#c9b8f0"/>
+      <g>
+        <animate attributeName="opacity" values="1" dur="1s"/>
+        <rect x="20" y="60" width="110" height="55" rx="10" fill="#ffd93d" stroke="${STROKE}" stroke-width="3">
+          <animate attributeName="x" values="20;90;90;20" keyTimes="0;0.4;0.55;1" dur="2.6s" repeatCount="indefinite"/>
+        </rect>
+        <circle cx="45" cy="118" r="10" fill="${STROKE}">
+          <animate attributeName="cx" values="45;115;115;45" keyTimes="0;0.4;0.55;1" dur="2.6s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="105" cy="118" r="10" fill="${STROKE}">
+          <animate attributeName="cx" values="105;175;175;105" keyTimes="0;0.4;0.55;1" dur="2.6s" repeatCount="indefinite"/>
+        </circle>
+        <rect x="30" y="70" width="24" height="18" rx="3" fill="#dff0fe">
+          <animate attributeName="x" values="30;100;100;30" keyTimes="0;0.4;0.55;1" dur="2.6s" repeatCount="indefinite"/>
+        </rect>
+      </g>
+      <g>
+        <circle cx="75" cy="80" r="9" fill="#ff9f43" stroke="${STROKE}" stroke-width="2.5">
+          <animate attributeName="cx" values="75;145;170;100" keyTimes="0;0.4;0.55;1" dur="2.6s" repeatCount="indefinite"/>
+          <animate attributeName="cy" values="80;80;80;80" dur="2.6s" repeatCount="indefinite"/>
+        </circle>
+        <line x1="75" y1="88" x2="75" y2="105" stroke="#ff9f43" stroke-width="4" stroke-linecap="round">
+          <animate attributeName="x1" values="75;145;170;100" keyTimes="0;0.4;0.55;1" dur="2.6s" repeatCount="indefinite"/>
+          <animate attributeName="x2" values="75;160;185;100" keyTimes="0;0.4;0.55;1" dur="2.6s" repeatCount="indefinite"/>
+        </line>
+      </g>
+    </svg>`,
+
+    // Car moving along a road with a stopwatch — speed
+    speed: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+      <rect x="0" y="120" width="220" height="30" fill="#c9b8f0"/>
+      ${[0,1,2,3,4].map(i=>`<rect x="${-30+i*55}" y="132" width="26" height="6" rx="3" fill="#fff">
+        <animate attributeName="x" values="${-30+i*55};${240+i*55}" dur="1.8s" repeatCount="indefinite"/>
+      </rect>`).join('')}
+      <g>
+        <animate attributeName="opacity" values="1" dur="1s"/>
+        <path d="M15,110 h60 l12,-22 h34 l10,22 h4 v20 h-120 z" fill="#ff9f43" stroke="${STROKE}" stroke-width="3">
+          <animate attributeName="transform" type="translate" values="0,0;150,0;0,0" dur="3.2s" repeatCount="indefinite"/>
+        </path>
+        <circle cx="45" cy="132" r="11" fill="${STROKE}">
+          <animate attributeName="transform" type="translate" values="0,0;150,0;0,0" dur="3.2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="105" cy="132" r="11" fill="${STROKE}">
+          <animate attributeName="transform" type="translate" values="0,0;150,0;0,0" dur="3.2s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+      <circle cx="185" cy="35" r="22" fill="#fff" stroke="${STROKE}" stroke-width="3"/>
+      <rect x="180" y="10" width="10" height="6" rx="2" fill="${STROKE}"/>
+      <line x1="185" y1="35" x2="185" y2="21" stroke="#ff5a5a" stroke-width="3" stroke-linecap="round">
+        <animateTransform attributeName="transform" type="rotate" values="0 185 35;360 185 35" dur="1.6s" repeatCount="indefinite"/>
+      </line>
+    </svg>`,
+
+    // Hand pushing a box, speeding up — force (F = m·a)
+    force: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+      <rect x="0" y="130" width="220" height="10" fill="#c9b8f0"/>
+      <g>
+        <animate attributeName="opacity" values="1" dur="1s"/>
+        <rect x="30" y="88" width="46" height="42" rx="6" fill="#8b5fd1" stroke="${STROKE}" stroke-width="3">
+          <animate attributeName="x" values="30;170;30" dur="2.6s" repeatCount="indefinite" calcMode="spline" keySplines="0.3 0 0.7 1;0 0 0 0" keyTimes="0;0.7;1"/>
+        </rect>
+      </g>
+      <g>
+        <line x1="10" y1="109" x2="26" y2="109" stroke="#ff5a5a" stroke-width="6" stroke-linecap="round">
+          <animate attributeName="x1" values="10;150;10" dur="2.6s" repeatCount="indefinite" calcMode="spline" keySplines="0.3 0 0.7 1;0 0 0 0" keyTimes="0;0.7;1"/>
+          <animate attributeName="x2" values="26;166;26" dur="2.6s" repeatCount="indefinite" calcMode="spline" keySplines="0.3 0 0.7 1;0 0 0 0" keyTimes="0;0.7;1"/>
+        </line>
+        <path d="M20,102 l10,7 l-10,7" fill="none" stroke="#ff5a5a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+          <animateTransform attributeName="transform" type="translate" values="0,0;140,0;0,0" dur="2.6s" repeatCount="indefinite" calcMode="spline" keySplines="0.3 0 0.7 1;0 0 0 0" keyTimes="0;0.7;1"/>
+        </path>
+      </g>
+    </svg>`,
+
+    // Heel pressing into snow — pressure (p = F/S)
+    pressure: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+      <rect x="0" y="100" width="220" height="50" fill="#eaf3fb" stroke="${STROKE}" stroke-width="2"/>
+      <ellipse cx="120" cy="101" rx="20" ry="5" fill="#c9dcee">
+        <animate attributeName="rx" values="6;22;6" dur="2.2s" repeatCount="indefinite"/>
+      </ellipse>
+      <g>
+        <animate attributeName="opacity" values="1" dur="1s"/>
+        <path d="M105,40 h20 v35 h10 l3,20 h-46 l3,-20 h10 z" fill="#ff9f43" stroke="${STROKE}" stroke-width="3">
+          <animate attributeName="transform" type="translate" values="0,0;0,18;0,0" dur="2.2s" repeatCount="indefinite"/>
+        </path>
+      </g>
+      <line x1="120" y1="10" x2="120" y2="35" stroke="#ff5a5a" stroke-width="4" stroke-linecap="round">
+        <animate attributeName="opacity" values="1;0.3;1" dur="2.2s" repeatCount="indefinite"/>
+      </line>
+      <path d="M112,22 l8,13 l8,-13" fill="none" stroke="#ff5a5a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`,
+
+    // Hanging spring with a bouncing weight — elasticity (Hooke's law)
+    elasticity: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+      <rect x="80" y="10" width="60" height="10" rx="3" fill="${STROKE}"/>
+      <path d="M110,20 L98,28 L122,36 L98,44 L122,52 L98,60 L122,68 L110,76" fill="none" stroke="#ff9f43" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+        <animate attributeName="d" values="
+          M110,20 L98,28 L122,36 L98,44 L122,52 L98,60 L122,68 L110,76;
+          M110,20 L96,34 L124,48 L96,62 L124,76 L96,90 L124,104 L110,118;
+          M110,20 L98,28 L122,36 L98,44 L122,52 L98,60 L122,68 L110,76"
+          dur="1.8s" repeatCount="indefinite"/>
+      </path>
+      <circle cx="110" cy="86" r="16" fill="#8b5fd1" stroke="${STROKE}" stroke-width="3">
+        <animate attributeName="cy" values="86;128;86" dur="1.8s" repeatCount="indefinite"/>
+      </circle>
+    </svg>`,
+
+    // Spoon in a cup of hot tea, heat travelling up the handle — conduction
+    conduction: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+      <path d="M60,90 q0,40 40,40 h20 q40,0 40,-40 v-30 h-100 z" fill="#fff" stroke="${STROKE}" stroke-width="3"/>
+      <path d="M150,65 q22,-5 22,15 q0,20 -22,15" fill="none" stroke="${STROKE}" stroke-width="4"/>
+      <path d="M62,70 h96 v20 q0,38 -48,38 q-48,0 -48,-38 z" fill="#c17a3c"/>
+      <line x1="62" y1="70" x2="158" y2="70" stroke="#8a5528" stroke-width="2"/>
+      <line x1="90" y1="118" x2="132" y2="22" stroke="#dfe4ea" stroke-width="7" stroke-linecap="round"/>
+      <line x1="90" y1="118" x2="132" y2="22" stroke="${STROKE}" stroke-width="7" stroke-linecap="round" opacity="0.18"/>
+      ${[0,1,2].map(i=>`<circle r="5" fill="#ff7a3c">
+        <animateMotion dur="1.6s" begin="${i*0.5}s" repeatCount="indefinite" path="M90,118 L132,22"/>
+        <animate attributeName="opacity" values="1;1;0" dur="1.6s" begin="${i*0.5}s" repeatCount="indefinite"/>
+      </circle>`).join('')}
+    </svg>`,
+
+// Steam turning into droplets on a cold surface
+  condensation: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <rect x="40" y="15" width="140" height="60" rx="8" fill="#dff0fe" stroke="${STROKE}" stroke-width="3"/>
+    ${[0,1,2].map(i=>`<circle cx="${65+i*45}" cy="${30+ (i%2)*8}" r="5" fill="#4fb3f0">
+      <animate attributeName="cy" values="70;30;30" dur="2s" begin="${i*0.4}s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;1;1" dur="2s" begin="${i*0.4}s" repeatCount="indefinite"/>
+    </circle>`).join('')}
+    <path d="M70,120 q8,-16 -2,-28 q12,5 8,22" fill="#ff9f43" stroke="${STROKE}" stroke-width="2.5">
+      <animate attributeName="opacity" values="1;0.5;1" dur="1.4s" repeatCount="indefinite"/>
+    </path>
+    <path d="M110,120 q8,-20 -2,-34 q12,6 8,26" fill="#ff9f43" stroke="${STROKE}" stroke-width="2.5">
+      <animate attributeName="opacity" values="0.6;1;0.6" dur="1.4s" repeatCount="indefinite"/>
+    </path>
+    <path d="M150,120 q8,-16 -2,-28 q12,5 8,22" fill="#ff9f43" stroke="${STROKE}" stroke-width="2.5">
+      <animate attributeName="opacity" values="1;0.5;1" dur="1.4s" repeatCount="indefinite"/>
+    </path>
+    <rect x="60" y="120" width="100" height="14" rx="4" fill="#8b5fd1" stroke="${STROKE}" stroke-width="2.5"/>
+  </svg>`,
+
+  // Warm air rising from a radiator, cool air sinking (convection loop)
+  convection: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <rect x="20" y="110" width="50" height="26" rx="5" fill="#ff9f43" stroke="${STROKE}" stroke-width="3"/>
+    <path d="M45,108 C20,80 20,50 45,25 C80,10 140,10 175,25 C190,50 190,80 165,108" fill="none" stroke="#c9b8f0" stroke-width="3" stroke-dasharray="8 6"/>
+    <circle r="6" fill="#ff7a3c">
+      <animateMotion dur="3s" repeatCount="indefinite" path="M45,108 C20,80 20,50 45,25 C80,10 140,10 175,25 C190,50 190,80 165,108 Z"/>
+    </circle>
+    <circle r="6" fill="#4fb3f0">
+      <animateMotion dur="3s" begin="1.5s" repeatCount="indefinite" path="M45,108 C20,80 20,50 45,25 C80,10 140,10 175,25 C190,50 190,80 165,108 Z"/>
+    </circle>
+    <rect x="0" y="136" width="220" height="10" fill="#c9b8f0"/>
+  </svg>`,
+
+  // Puddle shrinking, molecules escaping into the air
+  evaporation: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <rect x="0" y="120" width="220" height="20" fill="#c9b8f0"/>
+    <ellipse cx="110" cy="122" rx="70" ry="12" fill="#4fb3f0">
+      <animate attributeName="rx" values="70;30;70" dur="3s" repeatCount="indefinite"/>
+    </ellipse>
+    ${[0,1,2,3].map(i=>`<circle cx="${70+i*25}" cy="110" r="4" fill="#8ecdf5">
+      <animate attributeName="cy" values="110;40" dur="1.8s" begin="${i*0.45}s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0" dur="1.8s" begin="${i*0.45}s" repeatCount="indefinite"/>
+    </circle>`).join('')}
+    <circle cx="185" cy="30" r="18" fill="#ffc93c" stroke="${STROKE}" stroke-width="3"/>
+  </svg>`,
+
+  // Ice cube shrinking into a puddle
+  melting: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <rect x="0" y="125" width="220" height="15" fill="#c9b8f0"/>
+    <ellipse cx="110" cy="125" rx="10" ry="5" fill="#4fb3f0">
+      <animate attributeName="rx" values="8;55;8" dur="3s" repeatCount="indefinite"/>
+    </ellipse>
+    <rect x="85" y="60" width="50" height="50" rx="8" fill="#cdeeff" stroke="${STROKE}" stroke-width="3">
+      <animate attributeName="height" values="60;6;60" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="y" values="60;114;60" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="width" values="50;60;50" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="x" values="85;80;85" dur="3s" repeatCount="indefinite"/>
+    </rect>
+  </svg>`,
+
+  // Water surface freezing into a faceted ice crystal
+  freezing: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <rect x="30" y="60" width="160" height="60" rx="8" fill="#4fb3f0">
+      <animate attributeName="fill" values="#4fb3f0;#cdeeff;#4fb3f0" dur="3s" repeatCount="indefinite"/>
+    </rect>
+    <path d="M30,90 q40,-14 80,0 t80,0" fill="none" stroke="#2b8fd0" stroke-width="2.5">
+      <animate attributeName="opacity" values="1;0;1" dur="3s" repeatCount="indefinite"/>
+    </path>
+    <path d="M60,70 l20,10 l-5,20 M120,65 l25,8 l0,22 l-20,10" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round">
+      <animate attributeName="opacity" values="0;1;0" dur="3s" repeatCount="indefinite"/>
+    </path>
+    <rect x="30" y="60" width="160" height="60" rx="8" fill="none" stroke="${STROKE}" stroke-width="3"/>
+  </svg>`,
+
+  // Charged balloon/comb attracting hair strands, small spark
+  static: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <ellipse cx="70" cy="70" rx="34" ry="42" fill="#ff9f43" stroke="${STROKE}" stroke-width="3"/>
+    <line x1="70" y1="112" x2="70" y2="128" stroke="${STROKE}" stroke-width="2"/>
+    ${[0,1,2].map(i=>`<path d="M${140+i*15},${50+i*20} q20,${5-i*5} 34,${-2+i*3}" fill="none" stroke="#8b5fd1" stroke-width="3" stroke-linecap="round">
+      <animate attributeName="d" values="
+        M${140+i*15},${50+i*20} q20,${5-i*5} 34,${-2+i*3};
+        M${140+i*15},${50+i*20} q22,${-2-i*5} 36,${-10+i*3};
+        M${140+i*15},${50+i*20} q20,${5-i*5} 34,${-2+i*3}"
+        dur="1.2s" begin="${i*0.15}s" repeatCount="indefinite"/>
+    </path>`).join('')}
+    <path d="M100,72 l8,-10 l6,4 l8,-12" fill="none" stroke="#ffd93d" stroke-width="3" stroke-linecap="round">
+      <animate attributeName="opacity" values="0;1;0" dur="0.9s" repeatCount="indefinite"/>
+    </path>
+  </svg>`,
+
+  // Tower transmitting waves to a phone / remote receiving IR
+  signal: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <line x1="45" y1="130" x2="45" y2="55" stroke="${STROKE}" stroke-width="4"/>
+    <path d="M45,55 l-14,20 M45,55 l14,20" stroke="${STROKE}" stroke-width="3" fill="none"/>
+    <circle cx="45" cy="48" r="6" fill="#ff9f43"/>
+    <rect x="0" y="130" width="220" height="10" fill="#c9b8f0"/>
+    ${[0,1,2].map(i=>`<path d="M ${70+i*28} ${75-i*10} A ${30+i*20} ${30+i*20} 0 0 1 ${70+i*28} ${125+i*10}" fill="none" stroke="#8b5fd1" stroke-width="4" stroke-linecap="round">
+      <animate attributeName="opacity" values="0;1;0" dur="1.6s" begin="${i*0.3}s" repeatCount="indefinite"/>
+    </path>`).join('')}
+    <rect x="165" y="55" width="34" height="58" rx="6" fill="#efe6fb" stroke="${STROKE}" stroke-width="3"/>
+    <rect x="172" y="63" width="20" height="34" rx="2" fill="#ffffff" stroke="${STROKE}" stroke-width="1.5"/>
+  </svg>`,
+
+  // Light ray bouncing off a mirror at equal angles
+  reflection: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <rect x="150" y="20" width="10" height="120" fill="#cdeeff" stroke="${STROKE}" stroke-width="3"/>
+    <line x1="40" y1="40" x2="150" y2="80" stroke="#ffd93d" stroke-width="4" stroke-linecap="round">
+      <animate attributeName="opacity" values="1;0.5;1" dur="1.6s" repeatCount="indefinite"/>
+    </line>
+    <line x1="150" y1="80" x2="40" y2="120" stroke="#ff9f43" stroke-width="4" stroke-linecap="round">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="1.6s" repeatCount="indefinite"/>
+    </line>
+    <line x1="120" y1="80" x2="180" y2="80" stroke="${STROKE}" stroke-width="1.5" stroke-dasharray="4 4"/>
+  </svg>`,
+
+  // White ray entering a prism and splitting into a rainbow
+  dispersion: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <polygon points="90,110 140,110 115,50" fill="#efe6fb" stroke="${STROKE}" stroke-width="3"/>
+    <line x1="20" y1="90" x2="103" y2="95" stroke="#ffffff" stroke="#e0e0e0" stroke-width="5" stroke-linecap="round"/>
+    ${["#ff5a5a","#ff9f43","#ffd93d","#5fc17a","#4fb3f0","#8b5fd1"].map((c,i)=>`<line x1="128" y1="98" x2="${195}" y2="${60+i*13}" stroke="${c}" stroke-width="3" stroke-linecap="round">
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="1.8s" begin="${i*0.1}s" repeatCount="indefinite"/>
+    </line>`).join('')}
+  </svg>`,
+
+  // Convex lens converging parallel rays to a focal point
+  lens: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <path d="M110,20 Q140,80 110,140 Q80,80 110,20 Z" fill="#dff0fe" stroke="${STROKE}" stroke-width="3"/>
+    ${[0,1,2].map(i=>`<line x1="20" y1="${55+i*25}" x2="110" y2="${55+i*25}" stroke="#8b5fd1" stroke-width="3" stroke-linecap="round"/>`).join('')}
+    ${[0,1,2].map(i=>`<line x1="110" y1="${55+i*25}" x2="190" y2="105" stroke="#8b5fd1" stroke-width="3" stroke-linecap="round">
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="1.6s" begin="${i*0.2}s" repeatCount="indefinite"/>
+    </line>`).join('')}
+    <circle cx="190" cy="105" r="5" fill="#ff9f43"/>
+  </svg>`,
+
+  // Induction coil creating a changing field that heats a pot
+  induction: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <rect x="30" y="105" width="160" height="14" rx="4" fill="#7089c4" stroke="${STROKE}" stroke-width="3"/>
+    <path d="M50,105 q0,-20 20,-20 t20,20 t20,-20 t20,20 t20,-20 t20,20" fill="none" stroke="#8b5fd1" stroke-width="4">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="1s" repeatCount="indefinite"/>
+    </path>
+    <rect x="45" y="60" width="130" height="45" rx="6" fill="#dff0fe" stroke="${STROKE}" stroke-width="3"/>
+    <rect x="45" y="90" width="130" height="15" fill="#4fb3f0"/>
+    <circle r="4" fill="#ffd93d">
+      <animateMotion dur="1.2s" repeatCount="indefinite" path="M50,105 q0,-20 20,-20 t20,20 t20,-20 t20,20 t20,-20 t20,20"/>
+    </circle>
+  </svg>`,
+
+  // Thermometer in a cup of water — mercury slowly climbing to thermal equilibrium
+  equilibrium: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <path d="M65,60 L72,140 Q110,150 148,140 L155,60 Z" fill="none" stroke="${STROKE}" stroke-width="3"/>
+    <path d="M68,80 L152,80 L148,140 Q110,150 72,140 Z" fill="#4fb3f0" opacity="0.55"/>
+    <line x1="68" y1="80" x2="152" y2="80" stroke="#2b8fd0" stroke-width="2"/>
+    <rect x="103" y="20" width="14" height="90" rx="7" fill="#ffffff" stroke="${STROKE}" stroke-width="3"/>
+    <circle cx="110" cy="118" r="14" fill="#ffffff" stroke="${STROKE}" stroke-width="3"/>
+    <circle cx="110" cy="118" r="9" fill="#ff5a5a"/>
+    <rect x="106.5" y="60" width="7" height="52" fill="#ff5a5a">
+      <animate attributeName="y" values="100;60;60" dur="2.4s" repeatCount="indefinite"/>
+      <animate attributeName="height" values="12;52;52" dur="2.4s" repeatCount="indefinite"/>
+    </rect>
+  </svg>`,
+
+  // Side-by-side comparison: metal spoon glowing hot vs wooden handle staying cool
+  comparison: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <rect x="30" y="115" width="60" height="14" rx="4" fill="#dfe4ea" stroke="${STROKE}" stroke-width="2.5"/>
+    <text x="60" y="145" font-size="12" text-anchor="middle" fill="${STROKE}" font-family="Arial">металл</text>
+    <rect x="55" y="30" width="10" height="90" rx="4" stroke="${STROKE}" stroke-width="2.5">
+      <animate attributeName="fill" values="#c9c9c9;#ff5a5a;#c9c9c9" dur="2.4s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="130" y="115" width="60" height="14" rx="4" fill="#dfe4ea" stroke="${STROKE}" stroke-width="2.5"/>
+    <text x="160" y="145" font-size="12" text-anchor="middle" fill="${STROKE}" font-family="Arial">дерево</text>
+    <rect x="155" y="30" width="10" height="90" rx="4" fill="#a5722f" stroke="${STROKE}" stroke-width="2.5"/>
+    <path d="M40,120 q20,-6 40,0" fill="none" stroke="#ff9f43" stroke-width="3"/>
+    <path d="M140,120 q20,-6 40,0" fill="none" stroke="#ff9f43" stroke-width="3"/>
+  </svg>`,
+
+  // Side-by-side comparison: smooth sole slides far vs grooved sole grips and stops
+  traction: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <line x1="10" y1="130" x2="105" y2="130" stroke="#c9b8f0" stroke-width="4" stroke-linecap="round"/>
+    <line x1="115" y1="130" x2="210" y2="130" stroke="#c9b8f0" stroke-width="4" stroke-linecap="round"/>
+    <g>
+      <rect x="15" y="106" width="40" height="20" rx="6" fill="#8b5fd1" stroke="${STROKE}" stroke-width="2.5">
+        <animate attributeName="x" values="15;75;15" dur="2.2s" repeatCount="indefinite" calcMode="spline" keySplines="0.2 0.6 0.4 1;0 0 0 0" keyTimes="0;0.7;1"/>
+      </rect>
+      <rect x="17" y="123" width="36" height="4" fill="#6c3fb5">
+        <animate attributeName="x" values="17;77;17" dur="2.2s" repeatCount="indefinite" calcMode="spline" keySplines="0.2 0.6 0.4 1;0 0 0 0" keyTimes="0;0.7;1"/>
+      </rect>
+    </g>
+    <g>
+      <rect x="130" y="106" width="40" height="20" rx="6" fill="#ff9f43" stroke="${STROKE}" stroke-width="2.5">
+        <animate attributeName="x" values="130;150;130" dur="2.2s" repeatCount="indefinite" calcMode="spline" keySplines="0.2 0.6 0.4 1;0 0 0 0" keyTimes="0;0.35;1"/>
+      </rect>
+      <g>
+        <animate attributeName="opacity" values="1" dur="1s"/>
+        ${[0,1,2,3].map(i=>`<rect x="${134+i*9}" y="121" width="5" height="8" fill="#e08a3c">
+          <animate attributeName="x" values="${134+i*9};${154+i*9};${134+i*9}" dur="2.2s" repeatCount="indefinite" calcMode="spline" keySplines="0.2 0.6 0.4 1;0 0 0 0" keyTimes="0;0.35;1"/>
+        </rect>`).join('')}
+      </g>
+    </g>
+  </svg>`,
+
+  // Sound wave travelling to a wall and echoing back
+  echo: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <rect x="185" y="15" width="14" height="130" fill="#dfe4ea" stroke="${STROKE}" stroke-width="2.5"/>
+    <circle cx="30" cy="80" r="10" fill="#8b5fd1"/>
+    ${[0,1,2].map(i=>`<path d="M50,${80-20-i*4} A${30+i*22} ${30+i*22} 0 0 1 50,${80+20+i*4}" fill="none" stroke="#7089c4" stroke-width="3">
+      <animate attributeName="opacity" values="0;1;0" dur="1.8s" begin="${i*0.25}s" repeatCount="indefinite"/>
+    </path>`).join('')}
+    ${[0,1].map(i=>`<path d="M175,${80-15-i*10} A${20+i*14} ${20+i*14} 0 0 0 175,${80+15+i*10}" fill="none" stroke="#c77dff" stroke-width="3" transform="scale(-1,1) translate(-350,0)">
+      <animate attributeName="opacity" values="0;0.9;0" dur="1.8s" begin="${0.9+i*0.25}s" repeatCount="indefinite"/>
+    </path>`).join('')}
+  </svg>`,
+
+  // Headphone earcup: magnet moves a membrane that produces sound waves
+  headphones: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <path d="M55,80 a55,55 0 0 1 110,0" fill="none" stroke="${STROKE}" stroke-width="8" stroke-linecap="round"/>
+    <rect x="35" y="75" width="26" height="45" rx="13" fill="#8b5fd1" stroke="${STROKE}" stroke-width="3"/>
+    <rect x="159" y="75" width="26" height="45" rx="13" fill="#8b5fd1" stroke="${STROKE}" stroke-width="3"/>
+    <circle cx="172" cy="97" r="7" fill="#ff9f43" stroke="${STROKE}" stroke-width="2"/>
+    <line x1="172" y1="90" x2="172" y2="104" stroke="${STROKE}" stroke-width="3">
+      <animateTransform attributeName="transform" type="scale" values="1,1;1,1.6;1,1" dur="0.4s" repeatCount="indefinite" additive="sum"/>
+    </line>
+    ${[0,1,2].map(i=>`<path d="M${196+i*10},${97-10-i*4} q${8+i*3},${10+i*4} 0,${20+i*8}" fill="none" stroke="#7089c4" stroke-width="3">
+      <animate attributeName="opacity" values="0;1;0" dur="1s" begin="${i*0.2}s" repeatCount="indefinite"/>
+    </path>`).join('')}
+  </svg>`,
+
+  // Seismograph: pen draws a jittery line on a moving paper strip
+  seismograph: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <rect x="20" y="40" width="180" height="60" rx="6" fill="#ffffff" stroke="${STROKE}" stroke-width="3"/>
+    <polyline points="30,70 50,70 60,50 75,90 90,55 105,85 120,60 135,80 150,65 165,75 180,70 190,70"
+      fill="none" stroke="#ff5a5a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <animate attributeName="points" values="
+        30,70 50,70 60,50 75,90 90,55 105,85 120,60 135,80 150,65 165,75 180,70 190,70;
+        30,70 50,70 60,85 75,45 90,90 105,55 120,80 135,55 150,80 165,60 180,70 190,70;
+        30,70 50,70 60,50 75,90 90,55 105,85 120,60 135,80 150,65 165,75 180,70 190,70"
+        dur="1.4s" repeatCount="indefinite"/>
+    </polyline>
+    <rect x="20" y="105" width="180" height="16" rx="4" fill="#7089c4" stroke="${STROKE}" stroke-width="2.5"/>
+  </svg>`,
+
+  // Ball rolling along the ground and gradually slowing to a stop
+  rolling: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <line x1="10" y1="125" x2="210" y2="125" stroke="#c9b8f0" stroke-width="4" stroke-linecap="round"/>
+    <g>
+      <circle cx="30" cy="103" r="20" fill="#ff9f43" stroke="${STROKE}" stroke-width="3">
+        <animate attributeName="cx" values="30;170;170" dur="2.4s" repeatCount="indefinite" calcMode="spline" keySplines="0.2 0.6 0.4 1;0 0 0 0" keyTimes="0;0.7;1"/>
+      </circle>
+      <line x1="30" y1="83" x2="30" y2="123" stroke="${STROKE}" stroke-width="2.5">
+        <animate attributeName="x1" values="30;170;170" dur="2.4s" repeatCount="indefinite" calcMode="spline" keySplines="0.2 0.6 0.4 1;0 0 0 0" keyTimes="0;0.7;1"/>
+        <animate attributeName="x2" values="30;170;170" dur="2.4s" repeatCount="indefinite" calcMode="spline" keySplines="0.2 0.6 0.4 1;0 0 0 0" keyTimes="0;0.7;1"/>
+        <animateTransform attributeName="transform" type="rotate" values="0 30 103;720 170 103;720 170 103" dur="2.4s" repeatCount="indefinite" calcMode="spline" keySplines="0.2 0.6 0.4 1;0 0 0 0" keyTimes="0;0.7;1"/>
+      </line>
+    </g>
+  </svg>`,
+
+  // Sunlight entering the sea and scattering into blue at depth
+  sea: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <rect x="0" y="0" width="220" height="70" fill="#dff0fe"/>
+    <circle cx="175" cy="30" r="18" fill="#ffc93c" stroke="${STROKE}" stroke-width="3"/>
+    <rect x="0" y="70" width="220" height="90" fill="#2b8fd0"/>
+    <rect x="0" y="70" width="220" height="90" fill="#1a5f96" opacity="0.35"/>
+    <path d="M175,30 L110,70" stroke="#ffd93d" stroke-width="3" opacity="0.6" stroke-dasharray="5 5"/>
+    ${[0,1,2,3,4].map(i=>`<circle cx="${60+i*25}" cy="${85+ (i%2)*15}" r="4" fill="#4fb3f0">
+      <animate attributeName="cy" values="${75+(i%2)*10};${140+(i%2)*10};${75+(i%2)*10}" dur="${2.2+i*0.2}s" begin="${i*0.15}s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.9;0.2;0.9" dur="${2.2+i*0.2}s" begin="${i*0.15}s" repeatCount="indefinite"/>
+    </circle>`).join('')}
+    <path d="M0,70 q10,-6 20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.6"/>
+  </svg>`,
+
+  // Infrared beam travelling from a remote control to a television
+  remote: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <rect x="20" y="55" width="26" height="70" rx="8" fill="#3b2160" stroke="${STROKE}" stroke-width="2.5"/>
+    <circle cx="33" cy="70" r="5" fill="#ff5a5a"/>
+    <rect x="26" y="82" width="14" height="6" rx="2" fill="#c9b8f0"/>
+    <rect x="26" y="92" width="14" height="6" rx="2" fill="#c9b8f0"/>
+    <rect x="120" y="45" width="90" height="60" rx="6" fill="#2c1b4a" stroke="${STROKE}" stroke-width="3"/>
+    <rect x="128" y="53" width="74" height="44" fill="#7089c4"/>
+    ${[0,1,2].map(i=>`<line x1="${50+i*8}" y1="${75-i*4}" x2="${115+i*10}" y2="75" stroke="#ff5a5a" stroke-width="2.5" stroke-dasharray="4 4">
+      <animate attributeName="opacity" values="0;1;0" dur="1.2s" begin="${i*0.15}s" repeatCount="indefinite"/>
+    </line>`).join('')}
+  </svg>`,
+
+  // A little sailboat bobbing on the water surface
+  boat: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <rect x="0" y="95" width="220" height="65" fill="#4fb3f0" opacity="0.6"/>
+    <path d="M0,95 q10,-6 20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0 t20,0" fill="none" stroke="#2b8fd0" stroke-width="2"/>
+    <g>
+      <animate attributeName="opacity" values="1" dur="1s"/>
+      <path d="M60,95 L80,110 L140,110 L160,95 Z" fill="#8b5fd1" stroke="${STROKE}" stroke-width="3">
+        <animateTransform attributeName="transform" type="translate" values="0,0;0,-4;0,0" dur="2s" repeatCount="indefinite" additive="sum"/>
+      </path>
+      <line x1="110" y1="95" x2="110" y2="40" stroke="${STROKE}" stroke-width="3">
+        <animateTransform attributeName="transform" type="translate" values="0,0;0,-4;0,0" dur="2s" repeatCount="indefinite" additive="sum"/>
+      </line>
+      <path d="M112,42 L112,90 L150,88 Z" fill="#ffffff" stroke="${STROKE}" stroke-width="2">
+        <animateTransform attributeName="transform" type="translate" values="0,0;0,-4;0,0" dur="2s" repeatCount="indefinite" additive="sum"/>
+      </path>
+    </g>
+  </svg>`,
+
+  // Bathyscaphe dropping ballast and rising through the water
+  submarine: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <rect x="0" y="0" width="220" height="160" fill="#1a5f96" opacity="0.3"/>
+    <rect x="0" y="0" width="220" height="160" fill="#2b8fd0" opacity="0.2"/>
+    <g>
+      <ellipse cx="110" cy="110" rx="42" ry="20" fill="#7089c4" stroke="${STROKE}" stroke-width="3">
+        <animate attributeName="cy" values="120;40;40" dur="2.6s" repeatCount="indefinite" calcMode="spline" keySplines="0.3 0 0.6 1;0 0 0 0" keyTimes="0;0.7;1"/>
+      </ellipse>
+      <circle cx="110" cy="110" r="10" fill="#dff0fe" stroke="${STROKE}" stroke-width="2">
+        <animate attributeName="cy" values="120;40;40" dur="2.6s" repeatCount="indefinite" calcMode="spline" keySplines="0.3 0 0.6 1;0 0 0 0" keyTimes="0;0.7;1"/>
+      </circle>
+    </g>
+    <rect x="100" y="128" width="20" height="10" rx="2" fill="#3b2160">
+      <animate attributeName="y" values="128;128;160" dur="2.6s" repeatCount="indefinite" keyTimes="0;0.15;1"/>
+      <animate attributeName="opacity" values="1;1;0" dur="2.6s" repeatCount="indefinite" keyTimes="0;0.5;0.6"/>
+    </rect>
+    ${[0,1,2].map(i=>`<circle cx="${95+i*12}" cy="130" r="3" fill="#dff0fe">
+      <animate attributeName="cy" values="130;20" dur="2s" begin="${0.3+i*0.2}s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.9;0" dur="2s" begin="${0.3+i*0.2}s" repeatCount="indefinite"/>
+    </circle>`).join('')}
+  </svg>`,
+
+  // Kitchen extractor hood pulling steam up and away from the pot
+  ventHood: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <path d="M60,15 L160,15 L185,45 L35,45 Z" fill="#dfe4ea" stroke="${STROKE}" stroke-width="3"/>
+    <rect x="100" y="0" width="20" height="18" fill="#dfe4ea" stroke="${STROKE}" stroke-width="2.5"/>
+    <rect x="70" y="120" width="80" height="16" rx="4" fill="#7089c4" stroke="${STROKE}" stroke-width="3"/>
+    <path d="M75,120 h70 v-10 q-35,-12 -70,0 z" fill="#4fb3f0"/>
+    ${[0,1,2].map(i=>`<path d="M${85+i*25},108 q6,-25 -2,-45 q10,10 6,45" fill="none" stroke="#c9d6e0" stroke-width="3" stroke-linecap="round">
+      <animate attributeName="opacity" values="0.9;0.1;0.9" dur="1.4s" begin="${i*0.2}s" repeatCount="indefinite"/>
+      <animate attributeName="d" values="
+        M${85+i*25},108 q6,-25 -2,-45 q10,10 6,45;
+        M${85+i*25},60 q6,-15 -2,-25 q10,6 6,25;
+        M${85+i*25},108 q6,-25 -2,-45 q10,10 6,45"
+        dur="1.4s" begin="${i*0.2}s" repeatCount="indefinite"/>
+    </path>`).join('')}
+  </svg>`,
+
+  // A figure bouncing on a trampoline
+  trampoline: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <ellipse cx="110" cy="135" rx="75" ry="16" fill="#dfe4ea" stroke="${STROKE}" stroke-width="3"/>
+    <ellipse cx="110" cy="132" rx="60" ry="10" fill="#8b5fd1"/>
+    ${[0,1,2,3,4,5].map(i=>`<line x1="${50+i*24}" y1="140" x2="${50+i*24}" y2="150" stroke="#c9b8f0" stroke-width="3"/>`).join('')}
+    <g>
+      <circle cx="110" cy="55" r="13" fill="#ffd27a" stroke="${STROKE}" stroke-width="2.5">
+        <animate attributeName="cy" values="55;115;55" dur="1.6s" repeatCount="indefinite" calcMode="spline" keySplines="0.3 0 0.7 1;0.3 0 0.7 1"/>
+      </circle>
+      <line x1="110" y1="68" x2="110" y2="105" stroke="${STROKE}" stroke-width="4" stroke-linecap="round">
+        <animate attributeName="y1" values="68;122;68" dur="1.6s" repeatCount="indefinite" calcMode="spline" keySplines="0.3 0 0.7 1;0.3 0 0.7 1"/>
+        <animate attributeName="y2" values="105;132;105" dur="1.6s" repeatCount="indefinite" calcMode="spline" keySplines="0.3 0 0.7 1;0.3 0 0.7 1"/>
+      </line>
+    </g>
+  </svg>`,
+
+  // Spring scale (dynamometer) stretching under a hanging weight
+  dynamometer: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <rect x="95" y="10" width="30" height="10" rx="3" fill="${STROKE}"/>
+    <rect x="90" y="20" width="40" height="70" rx="18" fill="#efe6fb" stroke="${STROKE}" stroke-width="3"/>
+    ${[0,1,2,3,4].map(i=>`<line x1="132" y1="${28+i*13}" x2="140" y2="${28+i*13}" stroke="${STROKE}" stroke-width="2"/>`).join('')}
+    <line x1="110" y1="90" x2="110" y2="115" stroke="#ff9f43" stroke-width="4">
+      <animate attributeName="y2" values="105;125;105" dur="2s" repeatCount="indefinite"/>
+    </line>
+    <rect x="90" y="115" width="40" height="30" rx="5" fill="#8b5fd1" stroke="${STROKE}" stroke-width="3">
+      <animate attributeName="y" values="105;125;105" dur="2s" repeatCount="indefinite"/>
+    </rect>
+  </svg>`,
+
+  // A plastic comb lifting strands of hair through static electricity
+  comb: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <rect x="70" y="35" width="80" height="18" rx="6" fill="#8b5fd1" stroke="${STROKE}" stroke-width="3">
+      <animate attributeName="y" values="35;30;35" dur="1.6s" repeatCount="indefinite"/>
+    </rect>
+    ${[0,1,2,3,4,5,6].map(i=>`<line x1="${76+i*10}" y1="53" x2="${76+i*10}" y2="70" stroke="#8b5fd1" stroke-width="4" stroke-linecap="round">
+      <animate attributeName="y1" values="53;48;53" dur="1.6s" repeatCount="indefinite"/>
+      <animate attributeName="y2" values="70;65;70" dur="1.6s" repeatCount="indefinite"/>
+    </line>`).join('')}
+    ${[0,1,2,3,4,5].map(i=>`<path d="M${75+i*12},150 Q${78+i*12},110 ${80+i*12},75" fill="none" stroke="${STROKE}" stroke-width="2.5" stroke-linecap="round">
+      <animate attributeName="d" values="
+        M${75+i*12},150 Q${78+i*12},110 ${80+i*12},95;
+        M${75+i*12},150 Q${78+i*12},100 ${80+i*12},72;
+        M${75+i*12},150 Q${78+i*12},110 ${80+i*12},95"
+        dur="1.6s" repeatCount="indefinite"/>
+    </path>`).join('')}
+  </svg>`,
+
+  // A spark jumping from a doorknob when it's touched
+  doorSpark: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <rect x="140" y="20" width="16" height="120" fill="#efe6fb" stroke="${STROKE}" stroke-width="2.5"/>
+    <circle cx="132" cy="82" r="12" fill="#c9c9c9" stroke="${STROKE}" stroke-width="2.5"/>
+    <path d="M40,60 Q70,70 100,80" fill="none" stroke="#ffd27a" stroke-width="10" stroke-linecap="round"/>
+    <path d="M108,79 l6,-8 l5,4 l7,-10" fill="none" stroke="#ffd93d" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+      <animate attributeName="opacity" values="0;0;1;0" keyTimes="0;0.6;0.7;1" dur="1.4s" repeatCount="indefinite"/>
+    </path>
+    <circle cx="118" cy="80" r="3" fill="#fff">
+      <animate attributeName="opacity" values="0;0;1;0" keyTimes="0;0.6;0.75;1" dur="1.4s" repeatCount="indefinite"/>
+    </circle>
+  </svg>`,
+
+  // A fuel truck's grounding chain draining static charge into the road
+  grounding: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <rect x="0" y="130" width="220" height="14" fill="#c9b8f0"/>
+    <rect x="30" y="60" width="120" height="55" rx="8" fill="#ff9f43" stroke="${STROKE}" stroke-width="3"/>
+    <rect x="140" y="75" width="45" height="40" rx="6" fill="#dfe4ea" stroke="${STROKE}" stroke-width="3"/>
+    <circle cx="65" cy="122" r="12" fill="${STROKE}"/>
+    <circle cx="150" cy="122" r="12" fill="${STROKE}"/>
+    <path d="M170,115 q-4,10 0,18" fill="none" stroke="#8b7ba8" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="170" cy="133" r="4" fill="#ffd93d">
+      <animate attributeName="cy" values="118;133;118" dur="1.2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0.3;1" dur="1.2s" repeatCount="indefinite"/>
+    </circle>
+  </svg>`,
+
+  // Two figures in the sun: sweat evaporates fast in dry air, lingers in humid air
+  humidity: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <circle cx="35" cy="25" r="16" fill="#ffc93c" stroke="${STROKE}" stroke-width="2.5"/>
+    <rect x="10" y="55" width="85" height="90" fill="#fff7d6"/>
+    <rect x="105" y="55" width="105" height="90" fill="#cdeeff"/>
+    <circle cx="50" cy="100" r="14" fill="#ffd27a" stroke="${STROKE}" stroke-width="2.5"/>
+    <line x1="50" y1="114" x2="50" y2="140" stroke="${STROKE}" stroke-width="4"/>
+    ${[0,1].map(i=>`<circle cx="${44+i*12}" cy="98" r="3" fill="#4fb3f0">
+      <animate attributeName="cy" values="98;70;98" dur="1.3s" begin="${i*0.3}s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0;1" dur="1.3s" begin="${i*0.3}s" repeatCount="indefinite"/>
+    </circle>`).join('')}
+    <circle cx="160" cy="100" r="14" fill="#ffd27a" stroke="${STROKE}" stroke-width="2.5"/>
+    <line x1="160" y1="114" x2="160" y2="140" stroke="${STROKE}" stroke-width="4"/>
+    ${[0,1].map(i=>`<circle cx="${154+i*12}" cy="102" r="3" fill="#4fb3f0">
+      <animate attributeName="cy" values="102;108;102" dur="1.3s" begin="${i*0.3}s" repeatCount="indefinite"/>
+    </circle>`).join('')}
+  </svg>`,
+
+  // A whistling kettle on the stove — distinct silhouette from a cooking pot
+  kettle: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <rect x="75" y="140" width="70" height="10" rx="3" fill="#7089c4" stroke="${STROKE}" stroke-width="3"/>
+    <path d="M58,118 A52,54 0 0 1 162,118 L58,118 Z" fill="#dfe4ea" stroke="${STROKE}" stroke-width="3"/>
+    <path d="M80,80 C30,74 20,100 68,105" fill="none" stroke="${STROKE}" stroke-width="8" stroke-linecap="round"/>
+    <path d="M140,85 Q175,65 195,80 Q188,95 148,105 Z" fill="#dfe4ea" stroke="${STROKE}" stroke-width="3" stroke-linejoin="round"/>
+    <ellipse cx="110" cy="58" rx="10" ry="13" fill="${STROKE}"/>
+    ${[0,1,2].map(i=>`<path d="M195,${72-i*3} q8,-12 -2,-22 q10,5 4,20" fill="none" stroke="#c9d6e0" stroke-width="3" stroke-linecap="round">
+      <animate attributeName="opacity" values="0;1;0" dur="1s" begin="${i*0.3}s" repeatCount="indefinite"/>
+      <animate attributeName="transform" type="translate" values="0,4;0,-6;0,4" dur="1s" begin="${i*0.3}s" repeatCount="indefinite"/>
+    </path>`).join('')}
+  </svg>`,
+
+  // Droplets forming specifically on the underside of a pot lid
+  lid: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <rect x="50" y="108" width="120" height="34" rx="8" fill="#7089c4" stroke="${STROKE}" stroke-width="3"/>
+    <rect x="36" y="115" width="16" height="11" rx="4" fill="#7089c4" stroke="${STROKE}" stroke-width="2.5"/>
+    <rect x="168" y="115" width="16" height="11" rx="4" fill="#7089c4" stroke="${STROKE}" stroke-width="2.5"/>
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0,0; -2,-3; 1,-4; -1,-2; 0,0" dur="0.45s" repeatCount="indefinite"/>
+      <path d="M48,108 Q110,52 172,108 Z" fill="#dfe4ea" stroke="${STROKE}" stroke-width="3" stroke-linejoin="round"/>
+      <ellipse cx="110" cy="56" rx="10" ry="6" fill="#8b5fd1" stroke="${STROKE}" stroke-width="2.5"/>
+      <circle cx="78" cy="78" r="4" fill="#4fb3f0">
+        <animate attributeName="cx" values="78;68" dur="1.8s" repeatCount="indefinite"/>
+        <animate attributeName="cy" values="78;105" dur="1.8s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.8;1" dur="1.8s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="142" cy="80" r="4" fill="#4fb3f0">
+        <animate attributeName="cx" values="142;154" dur="2s" begin="0.6s" repeatCount="indefinite"/>
+        <animate attributeName="cy" values="80;106" dur="2s" begin="0.6s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.8;1" dur="2s" begin="0.6s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+    ${[[45,-1],[175,1]].map(([x,dir])=>
+      [0,1,2].map(j=>`<path d="M${x+dir*(2+j*3)},106 q${dir*10},-10 ${dir*4},-22" fill="none" stroke="#c9d6e0" stroke-width="2.5" stroke-linecap="round">
+      <animate attributeName="opacity" values="0;1;0" dur="0.9s" begin="${j*0.25+(dir<0?0:0.15)}s" repeatCount="indefinite"/>
+    </path>`).join('')
+    ).join('')}
+  </svg>`,
+
+  // A bathroom mirror slowly fogging up from shower steam
+  mirror: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <rect x="60" y="15" width="100" height="120" rx="10" fill="#3b2160" stroke="${STROKE}" stroke-width="4"/>
+    <rect x="68" y="23" width="84" height="104" rx="6" fill="#dff0fe"/>
+    <rect x="68" y="23" width="84" height="104" rx="6" fill="#ffffff">
+      <animate attributeName="opacity" values="0;0.85;0.85;0" dur="3.2s" repeatCount="indefinite"/>
+    </rect>
+    ${[0,1,2].map(i=>`<path d="M${85+i*20},${40+i*10} q-2,25 0,50" fill="none" stroke="#cdeeff" stroke-width="3" stroke-linecap="round">
+      <animate attributeName="opacity" values="0;0;0.8;0" keyTimes="0;0.6;0.85;1" dur="3.2s" begin="${i*0.2}s" repeatCount="indefinite"/>
+    </path>`).join('')}
+    ${[0,1].map(i=>`<path d="M${95+i*25},150 q6,-14 -2,-26 q10,6 6,24" fill="none" stroke="#c9d6e0" stroke-width="3" stroke-linecap="round">
+      <animate attributeName="opacity" values="0.9;0.2;0.9" dur="1.6s" begin="${i*0.3}s" repeatCount="indefinite"/>
+    </path>`).join('')}
+  </svg>`,
+
+  // Split scene: snow and frost on one side, sun and rain on the other
+  seasons: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <rect x="0" y="0" width="110" height="160" fill="#dceeff"/>
+    <rect x="110" y="0" width="110" height="160" fill="#fff3d6"/>
+    <g stroke="${STROKE}" stroke-width="3" stroke-linecap="round">
+      <line x1="55" y1="45" x2="55" y2="75"/>
+      <line x1="40" y1="60" x2="70" y2="60"/>
+      <line x1="45" y1="50" x2="65" y2="70"/>
+      <line x1="65" y1="50" x2="45" y2="70"/>
+    </g>
+    <circle cx="55" cy="60" r="4" fill="#7089c4">
+      <animate attributeName="cy" values="20;120" dur="2.4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;1;0" dur="2.4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="165" cy="35" r="18" fill="#ffc93c" stroke="${STROKE}" stroke-width="3"/>
+    <path d="M160,60 Q165,75 158,95" fill="none" stroke="#4fb3f0" stroke-width="4" stroke-linecap="round">
+      <animate attributeName="opacity" values="1;0.3;1" dur="1.2s" repeatCount="indefinite"/>
+    </path>
+    <path d="M175,60 Q180,80 173,105" fill="none" stroke="#4fb3f0" stroke-width="4" stroke-linecap="round">
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="1.2s" repeatCount="indefinite"/>
+    </path>
+    <rect x="0" y="130" width="110" height="30" fill="#ffffff"/>
+    <rect x="110" y="130" width="110" height="30" fill="#8fe08a"/>
+  </svg>`,
+
+  // Water shrinking in a shallow round saucer
+  saucer: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <ellipse cx="110" cy="110" rx="85" ry="20" fill="none" stroke="${STROKE}" stroke-width="3.5"/>
+    <ellipse cx="110" cy="103" rx="65" ry="14" fill="#4fb3f0">
+      <animate attributeName="rx" values="65;25;65" dur="3s" repeatCount="indefinite"/>
+    </ellipse>
+    ${[0,1,2,3].map(i=>`<circle cx="${75+i*22}" cy="90" r="4" fill="#8ecdf5">
+      <animate attributeName="cy" values="90;30" dur="1.8s" begin="${i*0.4}s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;0" dur="1.8s" begin="${i*0.4}s" repeatCount="indefinite"/>
+    </circle>`).join('')}
+    <circle cx="185" cy="30" r="16" fill="#ffc93c" stroke="${STROKE}" stroke-width="3"/>
+  </svg>`,
+
+  // A seated passenger held firmly in place by a tightening seatbelt
+  seatbelt: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <path d="M60,140 v-45 h70 v45 M60,95 h-15 v20 h15" fill="none" stroke="${STROKE}" stroke-width="4"/>
+    <g>
+      <circle cx="95" cy="65" r="16" fill="#ffd27a" stroke="${STROKE}" stroke-width="2.5">
+        <animate attributeName="cx" values="95;108;95" dur="1.8s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1"/>
+      </circle>
+      <rect x="78" y="80" width="34" height="45" rx="10" fill="#8b5fd1" stroke="${STROKE}" stroke-width="2.5">
+        <animate attributeName="x" values="78;91;78" dur="1.8s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.2 1;0.4 0 0.2 1"/>
+      </rect>
+    </g>
+    <line x1="65" y1="70" x2="118" y2="130" stroke="#ff5a5a" stroke-width="9" stroke-linecap="round">
+      <animate attributeName="stroke-width" values="9;13;9" dur="1.8s" repeatCount="indefinite"/>
+    </line>
+    <circle cx="118" cy="130" r="6" fill="${STROKE}"/>
+  </svg>`,
+
+  // Two bag flaps snapping shut through a hidden magnetic clasp
+  clasp: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+    <path d="M40,60 h140 v40 q0,30 -70,35 q-70,-5 -70,-35 z" fill="#8b5fd1" stroke="${STROKE}" stroke-width="3"/>
+    <g>
+      <rect x="60" y="40" width="45" height="28" rx="6" fill="#c9b8f0" stroke="${STROKE}" stroke-width="2.5">
+        <animate attributeName="x" values="45;65;65" dur="2s" repeatCount="indefinite" keyTimes="0;0.6;1"/>
+      </rect>
+      <rect x="115" y="40" width="45" height="28" rx="6" fill="#c9b8f0" stroke="${STROKE}" stroke-width="2.5">
+        <animate attributeName="x" values="135;115;115" dur="2s" repeatCount="indefinite" keyTimes="0;0.6;1"/>
+      </rect>
+    </g>
+    <circle cx="110" cy="54" r="7" fill="#ffd93d">
+      <animate attributeName="opacity" values="0;0;1;0.4" keyTimes="0;0.55;0.65;1" dur="2s" repeatCount="indefinite"/>
+    </circle>
+  </svg>`,
+
+    // Flat atom icon — fallback for anything else
+    generic: `<svg viewBox="0 0 220 160" width="100%" height="100%">
+      <g transform="translate(110 80)">
+        <g transform="rotate(0)">
+          <ellipse rx="72" ry="26" fill="none" stroke="#7089c4" stroke-width="5"/>
+          <circle r="7" fill="#7089c4">
+            <animateMotion dur="3s" repeatCount="indefinite" path="M72,0 A72,26 0 1,1 -72,0 A72,26 0 1,1 72,0"/>
+          </circle>
+        </g>
+        <g transform="rotate(60)">
+          <ellipse rx="72" ry="26" fill="none" stroke="#c77dff" stroke-width="5"/>
+          <circle r="7" fill="#c77dff">
+            <animateMotion dur="3.8s" repeatCount="indefinite" path="M72,0 A72,26 0 1,0 -72,0 A72,26 0 1,0 72,0"/>
+          </circle>
+        </g>
+        <g transform="rotate(120)">
+          <ellipse rx="72" ry="26" fill="none" stroke="#8b5fd1" stroke-width="5"/>
+          <circle r="7" fill="#8b5fd1">
+            <animateMotion dur="3.4s" repeatCount="indefinite" path="M72,0 A72,26 0 1,1 -72,0 A72,26 0 1,1 72,0"/>
+          </circle>
+        </g>
+        <circle r="18" fill="#8b5fd1"/>
+      </g>
+    </svg>`
+  };
+
+  const FORMULAS = {
+    speed: "v = s/t",
+    force: "F = m·a",
+    gravity: "P = m·g",
+    pendulum: "T = 2π√(l/g)",
+    wave: "f = v/λ",
+    refraction: "n = c/v",
+    scattering: "λ = v/f",
+    friction: "Fтр = μ·N",
+    pressure: "p = F/S",
+    heat: "Q = c·m·ΔT",
+    conduction: "Q = c·m·ΔT",
+    electricity: "U = I·R",
+    buoyancy: "FA = ρ·g·V",
+    magnetism: "F = B·I·L",
+    elasticity: "F = k·x",
+    inertia: "F = m·a",
+    condensation: "Q = L·m",
+    convection: "Q = c·m·ΔT",
+    evaporation: "Q = L·m",
+    melting: "Q = λ·m",
+    freezing: "Q = λ·m",
+    static: "F = k·q₁·q₂/r²",
+    signal: "λ = c/f",
+    reflection: "θ₁ = θ₂",
+    dispersion: "n = c/v",
+    lens: "1/f = 1/d₀ + 1/dᵢ",
+    induction: "ε = -ΔΦ/Δt",
+    equilibrium: "Q = c·m·ΔT",
+    comparison: "Q = c·m·ΔT",
+    traction: "Fтр = μ·N",
+    echo: "f = v/λ",
+    headphones: "f = v/λ",
+    seismograph: "f = 1/T",
+    rolling: "Fтр = μ·N",
+    sea: "λ = v/f",
+    remote: "λ = c/f",
+    boat: "FA = ρ·g·V",
+    submarine: "FA = ρ·g·V",
+    ventHood: "Q = c·m·ΔT",
+    trampoline: "F = k·x",
+    dynamometer: "F = k·x",
+    comb: "F = k·q₁·q₂/r²",
+    doorSpark: "F = k·q₁·q₂/r²",
+    grounding: "F = k·q₁·q₂/r²",
+    humidity: "Q = L·m",
+    kettle: "Q = c·m·ΔT",
+    lid: "Q = L·m",
+    mirror: "Q = L·m",
+    seasons: "Q = λ·m",
+    saucer: "Q = L·m",
+    seatbelt: "F = m·a",
+    clasp: "F = B·I·L",
+    generic: "E = h·ν"
+  };
+
+  const SCENE_KEYWORDS = {
+    speed: ['скорост','бег','машин','автомобил','ход'],
+    force: ['разгон','толка','тележк','ньютон'],
+    gravity: ['падени','гравитац','притяжен','сила тяжест','вес','яблок'],
+    pendulum: ['маятник','качел','колебан'],
+    wave: ['волн','звук','резонанс','музык'],
+    echo: ['эхо','пуст комнат','отражен звук'],
+    headphones: ['наушник','мембран'],
+    equilibrium: ['термометр','тепловое равновес'],
+    comparison: ['дерев ручк','сравнен'],
+    conduction: ['чай','кружк','металлич','сковород','ручка кастрюл'],
+    refraction: ['преломлен','стакан воды','линз'],
+    scattering: ['небо','голуб','рассеян','атмосфер','закат'],
+    sea: ['море','океан'],
+    traction: ['подошв','рифлён'],
+    friction: ['трен','скольж','кроссовк','тормоз'],
+    pressure: ['давлени','каблук','лыж','нож','шприц','игл'],
+    heat: ['кипен','кастрюл','суп','вар'],
+    kettle: ['чайник'],
+    electricity: ['электрич','ток','заряд','розетк','провод','лампочк','зарядк'],
+    buoyancy: ['плава','тонет','архимед','лёд','лед '],
+    boat: ['кораблик','лодк','кораб'],
+    submarine: ['батискаф','подводн'],
+    magnetism: ['магнит','притягива','скрепк'],
+    clasp: ['застёжк','застежк'],
+    elasticity: ['пружин','резинк','амортизатор','гук'],
+    trampoline: ['батут','подбрасыва'],
+    dynamometer: ['динамометр'],
+    inertia: ['инерц','торможен','автобус'],
+    seatbelt: ['ремень'],
+    condensation: ['конденсац','пар на','холодн'],
+    lid: ['крышк'],
+    mirror: ['зеркал','запотева'],
+    convection: ['конвекц','батаре','тёпл воздух','теплый воздух'],
+    ventHood: ['вытяжк'],
+    evaporation: ['испарен','лужа','высыха'],
+    saucer: ['блюдц'],
+    humidity: ['влажност','сухом климате','жару'],
+    melting: ['плавлен','тает','растаял'],
+    freezing: ['замерза','кристаллизац','лёд обра'],
+    seasons: ['снег','дождь летом'],
+    static: ['статическ','электризац','шарик'],
+    comb: ['расчёск'],
+    doorSpark: ['искра','дверн ручк','бьёт током'],
+    grounding: ['заземлен','бензовоз','цепь'],
+    signal: ['сигнал','инфракрасн','вышк','связь'],
+    remote: ['пульт'],
+    reflection: ['отражен свет','зеркал'],
+    dispersion: ['радуг','разложен'],
+    lens: ['линз','объектив','камер','фокус'],
+    induction: ['индукц'],
+    rolling: ['мяч катится','мяч продолжает'],
+    seismograph: ['сейсмограф','землетрясен']
+  };
+  function pickSceneByText(text){
+    const t = text.toLowerCase();
+    for(const key in SCENE_KEYWORDS){
+      if(SCENE_KEYWORDS[key].some(w=>t.includes(w))) return key;
+    }
+    return 'generic';
+  }
+
+  function renderScene(block, type, caption, formula){
+    const svg = SCENES[type] || SCENES.generic;
+    const f = formula || FORMULAS[type] || FORMULAS.generic;
+    const card = document.createElement('div');
+    card.className = 'scene-card';
+    card.innerHTML = `<div class="scene-svg-wrap">${svg}</div>
+      ${caption ? `<p class="scene-caption">${escapeHtml(caption)}</p>` : ''}
+      <div class="scene-formula-wrap"><span class="scene-formula">${escapeHtml(f)}</span></div>`;
+    block.appendChild(card);
+    scrollDown();
+  }
+
+  function escapeHtml(s){
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  // ---------- API call (preview only — talks directly to Claude for testing inside this chat) ----------
+  const SYSTEM_PROMPT = `Ты — дружелюбный помощник для школьного сайта "Понятная физика". Тебе пишут школьники и учителя.
+Тебе присылают бытовую ситуацию или вопрос про физическое явление. Твоя задача — либо объяснить, какое физическое явление скрывается за описанной ситуацией, либо привести жизненный пример явления, которое назвал пользователь.
+
+Отвечай ТОЛЬКО валидным JSON без markdown-разметки и без пояснений вокруг, строго в формате:
+{"reply": "объяснение простым, живым и дружелюбным языком, 2-4 предложения, для школьников, плюс в конце обязательно короткое пояснение самой формулы: что означает каждая буква в ней", "animationType": "один из перечисленных ниже типов", "caption": "короткая подпись к анимации, 3-6 слов", "formula": "формула СТРОГО из таблицы ниже, ровно в таком написании"}
+
+Вот типы анимаций и формула, которая к ним привязана — используй формулу ИЗ ЭТОГО СПИСКА для выбранного типа, ничего не придумывай и не меняй обозначения:
+- speed (ходьба, бег, машина) → v = s/t
+- force (разгон, толчок, второй закон Ньютона) → F = m·a
+- gravity (падение предметов, вес тела) → P = m·g
+- friction (трение, скольжение, торможение обувью) → Fтр = μ·N
+- pressure (каблуки, лыжи, нож, игла — площадь опоры) → p = F/S
+- buoyancy (плавучесть льда или любого притопленного тела, архимедова сила в целом) → FA = ρ·g·V
+- boat (кораблик или лодка держится на воде) → FA = ρ·g·V
+- submarine (батискаф или подводная лодка всплывает после сброса груза) → FA = ρ·g·V
+- heat (кипение воды в кастрюле или супе — жидкость нагревается целиком в широкой посуде) → Q = c·m·ΔT
+- kettle (чайник закипает на плите) → Q = c·m·ΔT
+- conduction (тепло передаётся через прикосновение к горячему предмету — ложка нагрелась в чае, ручка сковородки, металл на солнце) → Q = c·m·ΔT
+- equilibrium (два тела постепенно выравнивают температуру друг с другом — термометр в воде, еда остывает до комнатной температуры) → Q = c·m·ΔT
+- comparison (сравнение двух материалов по теплопроводности — металл и дерево, металл и пластик) → Q = c·m·ΔT
+- electricity (лампочки, зарядка, провода, закон Ома) → U = I·R
+- wave (звук из колонки, музыка, звуковые колебания в целом) → f = v/λ
+- echo (звук отражается от стены и возвращается — эхо в пустой комнате) → f = v/λ
+- headphones (электрический сигнал превращается в звук через мембрану — наушники, динамик) → f = v/λ
+- seismograph (запись механических колебаний — землетрясение, сейсмограф) → f = 1/T
+- scattering (почему небо голубое, рассеяние света в атмосфере) → λ = v/f
+- sea (почему море или океан выглядит синим) → λ = v/f
+- refraction (ложка в стакане выглядит сломанной, линзы, преломление света) → n = c/v
+- elasticity (пружина или резинка растягивается и возвращается, закон Гука в целом) → F = k·x
+- trampoline (человек подпрыгивает на батуте) → F = k·x
+- dynamometer (растяжение динамометра, измерение силы пружиной) → F = k·x
+- pendulum (маятник, качели) → T = 2π√(l/g)
+- magnetism (магниты притягивают металл, например магнит на холодильнике) → F = B·I·L
+- clasp (магнитная застёжка сумки закрывается) → F = B·I·L
+- inertia (пассажира кидает вперёд при резком торможении транспорта) → F = m·a
+- seatbelt (ремень безопасности удерживает и прижимает человека при остановке) → F = m·a
+- rolling (мяч или предмет катится и постепенно останавливается из-за трения) → Fтр = μ·N
+- traction (сравнение сцепления двух поверхностей — гладкая и рифлёная подошва) → Fтр = μ·N
+- condensation (пар превращается в капли на холодной поверхности в целом) → Q = L·m
+- lid (капли конденсата образуются на крышке кастрюли) → Q = L·m
+- mirror (зеркало в ванной запотевает от пара душа) → Q = L·m
+- convection (тёплый воздух поднимается вверх — например, батарея прогревает комнату) → Q = c·m·ΔT
+- ventHood (кухонная вытяжка втягивает пар и дым вверх) → Q = c·m·ΔT
+- evaporation (жидкость испаряется — лужа высыхает, пот) → Q = L·m
+- saucer (вода в блюдце постепенно испаряется) → Q = L·m
+- melting (твёрдое становится жидким — лёд тает) → Q = λ·m
+- freezing (жидкое становится твёрдым — вода замерзает) → Q = λ·m
+- seasons (сравнение зимнего снега и летнего дождя) → Q = λ·m
+- static (статическое электричество в целом — шарик притягивает волосы) → F = k·q₁·q₂/r²
+- comb (расчёска притягивает волосы) → F = k·q₁·q₂/r²
+- doorSpark (искра при касании металлической дверной ручки) → F = k·q₁·q₂/r²
+- grounding (заземление — например, цепь бензовоза стекает заряд в землю) → F = k·q₁·q₂/r²
+- humidity (сравнение сухой и влажной жары через испарение пота) → Q = L·m
+- signal (сигнал по воздуху без проводов на расстоянии — сотовая связь, wifi) → λ = c/f
+- remote (инфракрасный луч от пульта до телевизора) → λ = c/f
+- reflection (отражение света — зеркало) → θ₁ = θ₂
+- dispersion (разложение света на цвета — радуга) → n = c/v
+- lens (линза фокусирует свет — объектив камеры) → 1/f = 1/d₀ + 1/dᵢ
+- induction (электромагнитная индукция — индукционная плита) → ε = -ΔΦ/Δt
+- generic (если ничего из списка не подходит) → E = h·ν
+
+Пиши только на русском языке. Никогда не добавляй текст до или после JSON.`;
+
+  async function callClaude(userText){
+    const outgoing = [...history, {role:'user', content: userText}];
+    const res = await fetch("/.netlify/functions/ask", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        system: SYSTEM_PROMPT,
+        messages: outgoing
+      })
+    });
+    if(!res.ok){
+      let bodyText = '';
+      try{ bodyText = await res.text(); }catch(e){}
+      throw new Error(`HTTP ${res.status} ${res.statusText} — ${bodyText.slice(0,300)}`);
+    }
+    const data = await res.json();
+    const textBlock = (data.content || []).find(b => b.type === 'text');
+    const raw = textBlock ? textBlock.text : '';
+    history.push({role:'user', content: userText});
+    history.push({role:'assistant', content: raw});
+    return raw;
+  }
+
+  function parseModelJson(raw){
+    let cleaned = raw.trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+    try{
+      const obj = JSON.parse(cleaned);
+      if(obj && obj.reply) return obj;
+    }catch(e){ /* fall through */ }
+    return null;
+  }
+
+  // ---------- preset answers for the demo/example questions — instant, no internet needed ----------
+  // Keeps the presentation demo safe even if the venue's wifi or the API is down.
+  const PRESET_ANSWERS = {
+    "Почему в кастрюле с супом сначала закипают края, а не середина?": {
+      reply: "Дно и стенки кастрюли касаются самого горячего места — плиты, поэтому суп у краёв нагревается первым. Горячая жидкость становится легче и поднимается вверх, а холодная опускается вниз — так возникает движение, которое называется конвекцией. Именно поэтому пузырьки сначала появляются по краям! 🍲 В формуле Q это количество теплоты, c — удельная теплоёмкость вещества, m — масса, ΔT — изменение температуры.",
+      animationType: "heat",
+      caption: "Кипение супа в кастрюле",
+      formula: "Q = c·m·ΔT"
+    },
+    "Почему когда автобус резко тормозит, пассажиров кидает вперёд?": {
+      reply: "Твоё тело по инерции продолжает двигаться с прежней скоростью, даже когда автобус уже остановился — поэтому кажется, что тебя кидает вперёд. На самом деле это ты продолжаешь ехать, а автобус остановился раньше тебя! Именно поэтому в машине так важен ремень безопасности 🚌 В формуле F это сила, m — масса тела, a — его ускорение.",
+      animationType: "inertia",
+      caption: "Торможение автобуса",
+      formula: "F = m·a"
+    },
+    "Почему ложка в стакане с водой выглядит сломанной?": {
+      reply: "Свет идёт с разной скоростью в воздухе и в воде, и на границе между ними он преломляется — меняет направление. Из-за этого часть ложки, которая под водой, кажется сдвинутой в сторону, будто она сломана. На самом деле с ложкой всё в порядке — это обманывает нас свет! 🥄 В формуле n это показатель преломления, c — скорость света в вакууме, v — скорость света в веществе.",
+      animationType: "refraction",
+      caption: "Ложка в стакане воды",
+      formula: "n = c/v"
+    },
+    "Почему небо голубое?": {
+      reply: "Солнечный свет на самом деле состоит из всех цветов радуги. Когда он проходит через атмосферу, молекулы воздуха рассеивают синий и голубой свет намного сильнее, чем красный и жёлтый — потому что у голубого света короче длина волны. Вот это рассеянное во все стороны голубое сияние мы и видим, глядя вверх ☁️ В формуле λ это длина волны, v — скорость волны, f — её частота.",
+      animationType: "scattering",
+      caption: "Рассеяние света в атмосфере",
+      formula: "λ = v/f"
+    },
+    "Почему каблуки проваливаются в землю, а широкие лыжи — нет?": {
+      reply: "Дело не в весе, а в площади опоры! Один и тот же вес, давящий через маленький острый каблук, создаёт огромное давление на маленький кусочек земли — и каблук проваливается. А широкая лыжа распределяет тот же вес по большой площади, поэтому давление в каждой точке маленькое — и снег держит ⛷️ В формуле p это давление, F — сила, S — площадь, на которую она действует.",
+      animationType: "pressure",
+      caption: "Каблук против лыжи",
+      formula: "p = F/S"
+    },
+    "Почему батут подбрасывает человека вверх?": {
+      reply: "Когда ты приземляешься на батут, его пружины и ткань растягиваются — и запасают в себе энергию, как сжатая пружина. Чем сильнее ты продавил батут, тем сильнее он потом «выстрелит» тебя обратно вверх, возвращая эту энергию. Это тот же принцип, что и в обычной пружине! 🤸 В формуле F это сила упругости, k — жёсткость пружины, x — её удлинение.",
+      animationType: "trampoline",
+      caption: "Прыжок на батуте",
+      formula: "F = k·x"
+    },
+    "Почему лёд плавает, а не тонет?": {
+      reply: "Когда вода замерзает, её молекулы выстраиваются в решётку с пустотами — и лёд получается менее плотным, чем жидкая вода. Поэтому кубик льда легче такого же объёма воды, и выталкивающая сила легко удерживает его на поверхности. Это, кстати, и спасает рыб зимой — водоёмы замерзают сверху, а не до дна 🧊 В формуле FA это выталкивающая сила, ρ — плотность жидкости, g — ускорение свободного падения, V — объём погружённой части тела.",
+      animationType: "buoyancy",
+      caption: "Лёд в стакане воды",
+      formula: "FA = ρ·g·V"
+    },
+    "Почему вода в чайнике начинает кипеть?": {
+      reply: "Плита передаёт воде всё больше тепла, и температура растёт, пока не достигнет точки кипения. Тогда вода начинает превращаться в пар прямо внутри жидкости — это и есть те самые пузырьки, поднимающиеся снизу вверх. 🫖 В формуле Q это количество теплоты, c — удельная теплоёмкость вещества, m — масса, ΔT — изменение температуры.",
+      animationType: "kettle",
+      caption: "Чайник закипает",
+      formula: "Q = c·m·ΔT"
+    },
+    "Почему на крышке кастрюли появляются капли?": {
+      reply: "Горячий пар поднимается от кипящей воды и касается холодной крышки. Там он резко охлаждается и превращается обратно в маленькие капли жидкости — этот процесс называется конденсацией. 💧 В формуле Q это количество теплоты, L — удельная теплота парообразования, m — масса вещества.",
+      animationType: "lid",
+      caption: "Пар на крышке",
+      formula: "Q = L·m"
+    },
+    "Почему зеркало в ванной запотевает?": {
+      reply: "Тёплый влажный воздух после душа касается холодной поверхности зеркала и мгновенно остывает. Пар в воздухе превращается в мельчайшие капли воды прямо на стекле — зеркало покрывается туманом. 🪞 В формуле Q это количество теплоты, L — удельная теплота парообразования, m — масса вещества.",
+      animationType: "mirror",
+      caption: "Запотевшее зеркало",
+      formula: "Q = L·m"
+    },
+    "Почему на холодной трубе появляются капли воды?": {
+      reply: "Воздух возле холодной трубы охлаждается, а холодный воздух не может удерживать много водяного пара. Лишняя влага превращается в капли прямо на поверхности трубы. 🚰 В формуле Q это количество теплоты, L — удельная теплота парообразования, m — масса вещества.",
+      animationType: "condensation",
+      caption: "Холодный кран",
+      formula: "Q = L·m"
+    },
+    "Почему металлическая ложка в горячем чае быстро нагревается?": {
+      reply: "Тепло само переходит от горячего к холодному — от чая к металлу ложки. Металл хорошо проводит тепло, поэтому оно быстро добирается от опущенного в чай кончика до твоих пальцев на ручке. 🥄 В формуле Q это количество теплоты, c — удельная теплоёмкость вещества, m — масса, ΔT — изменение температуры.",
+      animationType: "conduction",
+      caption: "Ложка в стакане",
+      formula: "Q = c·m·ΔT"
+    },
+    "Почему ручка кастрюли из дерева меньше обжигает?": {
+      reply: "Дерево, в отличие от металла, очень плохо проводит тепло — оно почти не пропускает его дальше. Поэтому металлическая часть кастрюли раскаляется быстро, а деревянная ручка остаётся почти прохладной. 🪵 В формуле Q это количество теплоты, c — удельная теплоёмкость вещества, m — масса, ΔT — изменение температуры.",
+      animationType: "comparison",
+      caption: "Деревянная ручка",
+      formula: "Q = c·m·ΔT"
+    },
+    "Почему батареи отопления ставят внизу комнаты?": {
+      reply: "Тёплый воздух легче холодного, поэтому он поднимается вверх, а на его место снизу приходит холодный. Так в комнате возникает круговое движение воздуха, которое равномерно её прогревает. 🔥 В формуле Q это количество теплоты, c — удельная теплоёмкость вещества, m — масса, ΔT — изменение температуры.",
+      animationType: "convection",
+      caption: "Батарея под окном",
+      formula: "Q = c·m·ΔT"
+    },
+    "Почему вытяжка над плитой работает сверху?": {
+      reply: "Горячий воздух и пар от готовки поднимаются вверх сами по себе, ведь тёплый воздух легче холодного. Вытяжке достаточно просто забирать этот поток там, куда он и так поднимается. 💨 В формуле Q это количество теплоты, c — удельная теплоёмкость вещества, m — масса, ΔT — изменение температуры.",
+      animationType: "ventHood",
+      caption: "Вытяжка над плитой",
+      formula: "Q = c·m·ΔT"
+    },
+    "Почему лужа после дождя со временем исчезает?": {
+      reply: "С поверхности лужи постоянно улетают самые быстрые молекулы воды, превращаясь в невидимый пар в воздухе. Со временем таких молекул улетает всё больше, и лужа просто высыхает. ☀️ В формуле Q это количество теплоты, L — удельная теплота парообразования, m — масса вещества.",
+      animationType: "evaporation",
+      caption: "Испаряющаяся лужа",
+      formula: "Q = L·m"
+    },
+    "Почему воды в блюдце со временем становится меньше?": {
+      reply: "Вода постепенно испаряется с открытой поверхности — молекулы улетают в воздух одна за другой. Чем больше времени проходит, тем заметнее падает уровень воды. 🥣 В формуле Q это количество теплоты, L — удельная теплота парообразования, m — масса вещества.",
+      animationType: "saucer",
+      caption: "Блюдце с горячей водой",
+      formula: "Q = L·m"
+    },
+    "Почему термометр не сразу показывает правильную температуру?": {
+      reply: "Термометру нужно время, чтобы его собственная температура сравнялась с температурой воды — теплообмен происходит не мгновенно. Пока это не случится, столбик термометра продолжает медленно ползти вверх. 🌡️ В формуле Q это количество теплоты, c — удельная теплоёмкость вещества, m — масса, ΔT — изменение температуры.",
+      animationType: "equilibrium",
+      caption: "Термометр в воде",
+      formula: "Q = c·m·ΔT"
+    },
+    "Почему лёд превращается в воду?": {
+      reply: "Когда лёд получает тепло, его молекулы начинают двигаться активнее и постепенно разрушают жёсткую решётку, которая удерживала их на месте. Так твёрдый лёд становится жидкой водой — это называется плавлением. 🧊 В формуле Q это количество теплоты, λ — удельная теплота плавления, m — масса вещества.",
+      animationType: "melting",
+      caption: "Лёд тает",
+      formula: "Q = λ·m"
+    },
+    "Почему зимой вода превращается в лёд?": {
+      reply: "Когда вода отдаёт тепло холодному воздуху и остывает достаточно сильно, её молекулы замедляются и выстраиваются в жёсткую кристаллическую решётку. Так жидкая вода превращается в твёрдый лёд. ❄️ В формуле Q это количество теплоты, λ — удельная теплота плавления, m — масса вещества.",
+      animationType: "freezing",
+      caption: "Вода замерзает",
+      formula: "Q = λ·m"
+    },
+    "Почему мяч продолжает двигаться после толчка?": {
+      reply: "Любое тело стремится сохранять то движение, которое у него уже есть — это и есть инерция. Мяч катится дальше сам по себе, пока трение о землю постепенно не заберёт всю его скорость. ⚽ В формуле Fтр это сила трения, μ — коэффициент трения, N — сила давления на поверхность.",
+      animationType: "rolling",
+      caption: "Мяч катится",
+      formula: "Fтр = μ·N"
+    },
+    "Почему ремень безопасности удерживает человека при резкой остановке?": {
+      reply: "Тело человека по инерции продолжает двигаться вперёд с прежней скоростью, даже когда машина уже остановилась. Именно ремень берёт на себя эту силу и не даёт телу лететь дальше по инерции. 🚗 В формуле F это сила, m — масса тела, a — его ускорение.",
+      animationType: "seatbelt",
+      caption: "Ремень безопасности",
+      formula: "F = m·a"
+    },
+    "Почему на мокром полу легче поскользнуться?": {
+      reply: "Вода на полу уменьшает сцепление между подошвой обуви и поверхностью, то есть снижает силу трения. Без достаточного трения ноге не за что «зацепиться», и обувь просто едет по полу. 💦 В формуле Fтр это сила трения, μ — коэффициент трения, N — сила давления на поверхность.",
+      animationType: "friction",
+      caption: "Скользкий пол",
+      formula: "Fтр = μ·N"
+    },
+    "Почему кроссовки не так скользят, как гладкая подошва?": {
+      reply: "Рифлёная резиновая подошва цепляется за неровности поверхности гораздо лучше, чем гладкая, а значит создаёт большую силу трения. Чем больше шероховатость, тем крепче сцепление с землёй. 👟 В формуле Fтр это сила трения, μ — коэффициент трения, N — сила давления на поверхность.",
+      animationType: "traction",
+      caption: "Резиновая подошва",
+      formula: "Fтр = μ·N"
+    },
+    "Почему пружина возвращается в исходную форму?": {
+      reply: "Когда пружину растягивают, внутри неё запасается энергия, стремящаяся вернуть её обратно к исходной форме. Чем сильнее растяжение, тем сильнее эта возвращающая сила. 🌀 В формуле F это сила упругости, k — жёсткость пружины, x — её удлинение.",
+      animationType: "elasticity",
+      caption: "Пружина растянулась",
+      formula: "F = k·x"
+    },
+    "Почему нельзя слишком сильно тянуть динамометр?": {
+      reply: "Пружина внутри динамометра растягивается пропорционально приложенной силе, и по этому растяжению прибор показывает значение силы. Но у любой пружины есть предел, после которого она деформируется навсегда. ⚙️ В формуле F это сила упругости, k — жёсткость пружины, x — её удлинение.",
+      animationType: "dynamometer",
+      caption: "Динамометр",
+      formula: "F = k·x"
+    },
+    "Почему качели двигаются туда-сюда?": {
+      reply: "Качели раскачиваются вперёд и назад вокруг точки опоры — это классическое колебательное движение, похожее на маятник. Сила тяжести каждый раз возвращает их к нижней точке, и качели проходят её по инерции. 🛝 В формуле T это период одного качания, l — длина подвеса, g — ускорение свободного падения.",
+      animationType: "pendulum",
+      caption: "Качели",
+      formula: "T = 2π√(l/g)"
+    },
+    "Почему из колонки слышен звук?": {
+      reply: "Внутри колонки мембрана быстро колеблется вперёд-назад под действием электрического сигнала. Эти колебания передаются воздуху и расходятся волнами, которые наше ухо воспринимает как звук. 🔊 В формуле f это частота волны, v — скорость волны, λ — длина волны.",
+      animationType: "wave",
+      caption: "Колонка звучит",
+      formula: "f = v/λ"
+    },
+    "Почему в пустой комнате слышно эхо?": {
+      reply: "Звуковая волна долетает до стены и отражается от неё обратно, как мячик от стенки. Если комната достаточно большая и пустая, ухо успевает различить этот отражённый звук отдельно от исходного. 🗣️ В формуле f это частота волны, v — скорость волны, λ — длина волны.",
+      animationType: "echo",
+      caption: "Эхо в пустой комнате",
+      formula: "f = v/λ"
+    },
+    "Почему наушники превращают электрический сигнал в звук?": {
+      reply: "Электрический сигнал заставляет маленький электромагнит внутри наушника менять своё магнитное поле. Это движение передаётся тонкой мембране, которая начинает вибрировать и создавать звуковую волну. 🎧 В формуле f это частота волны, v — скорость волны, λ — длина волны.",
+      animationType: "headphones",
+      caption: "Наушники",
+      formula: "f = v/λ"
+    },
+    "Почему магнит держится на дверце холодильника?": {
+      reply: "Дверца холодильника сделана из металла, который притягивается магнитом — это называется ферромагнитным материалом. Магнитное поле магнита удерживает его прижатым к дверце без всякого клея. 🧲 В формуле F это сила магнитного поля, B — индукция поля, I — сила тока, L — длина проводника.",
+      animationType: "magnetism",
+      caption: "Магнит на холодильнике",
+      formula: "F = B·I·L"
+    },
+    "Почему сумка закрывается на магнитную застёжку?": {
+      reply: "Две части застёжки — это два маленьких магнита, которые притягиваются друг к другу магнитным полем. Стоит поднести их достаточно близко, и они сами защёлкиваются вместе. 👜 В формуле F это сила магнитного поля, B — индукция поля, I — сила тока, L — длина проводника.",
+      animationType: "clasp",
+      caption: "Магнитная застёжка",
+      formula: "F = B·I·L"
+    },
+    "Почему волосы тянутся к воздушному шарику?": {
+      reply: "При трении о волосы шарик забирает часть электронов и получает электрический заряд. Заряженный шарик начинает притягивать лёгкие волоски — это называется электризацией трением. 🎈 В формуле F это сила взаимодействия зарядов, q₁ и q₂ — величины зарядов, r — расстояние между ними.",
+      animationType: "static",
+      caption: "Шарик и волосы",
+      formula: "F = k·q₁·q₂/r²"
+    },
+    "Почему пластмассовая расчёска притягивает волосы?": {
+      reply: "Когда расчёска трётся о волосы, на ней накапливается электрический заряд. Заряженная расчёска притягивает к себе лёгкие волоски, и они словно тянутся следом за ней. 💇 В формуле F это сила взаимодействия зарядов, q₁ и q₂ — величины зарядов, r — расстояние между ними.",
+      animationType: "comb",
+      caption: "Расчёска и волосы",
+      formula: "F = k·q₁·q₂/r²"
+    },
+    "Почему иногда бьёт током, когда касаешься дверной ручки?": {
+      reply: "Пока ты ходишь по ковру в сухую погоду, на твоём теле незаметно накапливается электрический заряд. Когда ты касаешься металлической ручки, весь этот заряд мгновенно стекает через маленькую искру. ⚡ В формуле F это сила взаимодействия зарядов, q₁ и q₂ — величины зарядов, r — расстояние между ними.",
+      animationType: "doorSpark",
+      caption: "Искра у двери",
+      formula: "F = k·q₁·q₂/r²"
+    },
+    "Зачем бензовозу нужна цепь, касающаяся земли?": {
+      reply: "Во время движения на кузове бензовоза накапливается статический заряд от трения о воздух. Цепь, касающаяся дороги, постоянно уводит этот заряд в землю, не давая ему опасно накопиться. 🚛 В формуле F это сила взаимодействия зарядов, q₁ и q₂ — величины зарядов, r — расстояние между ними.",
+      animationType: "grounding",
+      caption: "Бензовоз и цепь",
+      formula: "F = k·q₁·q₂/r²"
+    },
+    "Почему лампочка начинает светиться после включения?": {
+      reply: "Электрический ток проходит через тонкую нить или полупроводник внутри лампы и нагревает её. Часть этой энергии превращается в свет, который мы видим, а часть — в тепло. 💡 В формуле U это напряжение, I — сила тока, R — сопротивление.",
+      animationType: "electricity",
+      caption: "Лампочка светится",
+      formula: "U = I·R"
+    },
+    "Как телефон получает сигнал без проводов?": {
+      reply: "Вышка связи передаёт информацию с помощью электромагнитных волн, которые распространяются по воздуху во все стороны. Антенна телефона улавливает эти волны и превращает их обратно в понятный сигнал. 📶 В формуле λ это длина волны, c — скорость света, f — частота сигнала.",
+      animationType: "signal",
+      caption: "Телефон ловит сигнал",
+      formula: "λ = c/f"
+    },
+    "Почему пульт от телевизора работает на расстоянии?": {
+      reply: "Пульт посылает невидимый глазу инфракрасный луч света в сторону телевизора. Специальный датчик на телевизоре улавливает этот луч и распознаёт в нём команду. 📺 В формуле λ это длина волны, c — скорость света, f — частота сигнала.",
+      animationType: "remote",
+      caption: "Пульт от телевизора",
+      formula: "λ = c/f"
+    },
+    "Почему мы видим своё отражение в зеркале?": {
+      reply: "Свет от твоего лица падает на гладкую поверхность зеркала и отражается от неё под тем же углом, под каким упал. Глаз ловит эти отражённые лучи и складывает из них твоё изображение. 🪞 Здесь θ₁ это угол падения луча, θ₂ — угол отражения, они всегда равны.",
+      animationType: "reflection",
+      caption: "Луч в зеркале",
+      formula: "θ₁ = θ₂"
+    },
+    "Почему ложка в стакане с водой выглядит изогнутой?": {
+      reply: "Свет движется в воздухе и в воде с разной скоростью, и на границе между ними он меняет направление. Из-за этого подводная часть ложки кажется сдвинутой в сторону, будто изогнутой. 🥄 В формуле n это показатель преломления, c — скорость света в вакууме, v — скорость света в веществе.",
+      animationType: "refraction",
+      caption: "Ложка в стакане кажется сломанной",
+      formula: "n = c/v"
+    },
+    "Почему после дождя на небе появляется радуга?": {
+      reply: "Белый солнечный свет на самом деле состоит из всех цветов сразу. Проходя через капли дождя, он преломляется и разделяется на отдельные цвета — так в небе появляется разноцветная дуга. 🌈 В формуле n это показатель преломления, c — скорость света в вакууме, v — скорость света в веществе.",
+      animationType: "dispersion",
+      caption: "Радуга",
+      formula: "n = c/v"
+    },
+    "Почему камера может чётко сфокусировать изображение?": {
+      reply: "Внутри объектива стоит выпуклая линза, которая собирает расходящиеся лучи света от предмета в одну точку на матрице. Двигая линзу, камера меняет эту точку схождения и наводит резкость. 📷 В формуле f это фокусное расстояние линзы, d₀ — расстояние до предмета, dᵢ — расстояние до изображения.",
+      animationType: "lens",
+      caption: "Объектив камеры",
+      formula: "1/f = 1/d₀ + 1/dᵢ"
+    },
+    "Почему кораблик не тонет?": {
+      reply: "Вода выталкивает погружённое в неё тело с силой, равной весу вытесненной воды. Если эта выталкивающая сила уравновешивает вес кораблика, он спокойно держится на поверхности. ⛵ В формуле FA это выталкивающая сила, ρ — плотность жидкости, g — ускорение свободного падения, V — объём погружённой части тела.",
+      animationType: "boat",
+      caption: "Кораблик на воде",
+      formula: "FA = ρ·g·V"
+    },
+    "Почему после сброса груза батискаф всплывает?": {
+      reply: "Пока вес батискафа больше выталкивающей силы воды, он тонет. Сбросив часть груза, аппарат становится легче, и та же выталкивающая сила воды начинает перевешивать — батискаф всплывает. 🌊 В формуле FA это выталкивающая сила, ρ — плотность жидкости, g — ускорение свободного падения, V — объём погружённой части тела.",
+      animationType: "submarine",
+      caption: "Батискаф всплывает",
+      formula: "FA = ρ·g·V"
+    },
+    "Почему индукционная плита греет посуду так быстро?": {
+      reply: "Плита создаёт быстро меняющееся магнитное поле прямо под дном посуды. Это поле само порождает электрический ток внутри металла кастрюли, и именно этот ток разогревает её. 🍳 В формуле ε это наведённое напряжение, ΔΦ — изменение магнитного потока, Δt — время этого изменения.",
+      animationType: "induction",
+      caption: "Индукционная плита",
+      formula: "ε = -ΔΦ/Δt"
+    },
+    "Почему сейсмограф может записать колебания земли?": {
+      reply: "Во время землетрясения земля колеблется, и эти механические волны доходят до прибора. Внутри сейсмографа тяжёлый груз почти неподвижен по инерции, а лента под ним движется вместе с землёй, вычерчивая колебания. 📈 В формуле f это частота волны, v — скорость волны, λ — длина волны.",
+      animationType: "seismograph",
+      caption: "Сейсмограф",
+      formula: "f = 1/T"
+    },
+    "Почему зимой идёт снег, а летом обычно нет?": {
+      reply: "Снежинки образуются из замёрзшей воды высоко в облаках. Если воздух по пути вниз холодный, они долетают до земли снегом, а если тёплый — успевают растаять и долетают уже дождём. 🌨️ В формуле Q это количество теплоты, λ — удельная теплота плавления, m — масса вещества.",
+      animationType: "seasons",
+      caption: "Снег зимой, дождь летом",
+      formula: "Q = λ·m"
+    },
+    "Почему жару легче переносить в сухом климате, чем во влажном?": {
+      reply: "Тело охлаждается за счёт испарения пота с кожи. В сухом воздухе пот испаряется быстро и хорошо охлаждает, а во влажном воздухе испарение идёт медленно, и жара ощущается гораздо тяжелее. 🥵 В формуле Q это количество теплоты, L — удельная теплота парообразования, m — масса вещества.",
+      animationType: "humidity",
+      caption: "Сухая жара и влажная жара",
+      formula: "Q = L·m"
+    },
+    "Почему подброшенный мяч всегда падает обратно на землю?": {
+      reply: "Землю и мяч притягивает друг к другу гравитация — сила тяжести. Пока мяч летит вверх, эта сила постоянно тормозит его, а потом тянет обратно вниз, к земле. Чем тяжелее предмет, тем сильнее его притягивает Земля, но падают все предметы (без учёта сопротивления воздуха) с одинаковым ускорением 🍎",
+      animationType: "gravity",
+      caption: "Мяч падает на землю",
+      formula: "P = m·g"
+    },
+    "Как спидометр в машине показывает скорость?": {
+      reply: "Спидометр считает, какое расстояние колёса машины проезжают за единицу времени — так и получается скорость. Если проехать 60 километров за час, скорость будет как раз 60 км/ч. Чем быстрее крутятся колёса, тем больше пути покрывается за то же время 🚗",
+      animationType: "speed",
+      caption: "Машина едет по дороге",
+      formula: "v = s/t"
+    },
+    "Почему тяжёлую тележку в магазине сложнее сдвинуть с места, чем лёгкую?": {
+      reply: "Чтобы разогнать любой предмет, нужна сила, и чем больше масса предмета, тем больше силы требуется для того же ускорения. Тяжёлая гружёная тележка обладает большей массой, поэтому её сложнее сдвинуть и разогнать, чем пустую и лёгкую 🛒",
+      animationType: "force",
+      caption: "Толчок тележки",
+      formula: "F = m·a"
+    },
+    "Почему море синее?": {
+      reply: "Вода поглощает красный и оранжевый свет сильнее, чем синий, поэтому чем глубже проходит свет, тем больше в нём остаётся именно синих и голубых лучей. Часть этого синего света рассеивается обратно вверх, и поэтому море и океан кажутся нам синими 🌊",
+      animationType: "sea",
+      caption: "Море синего цвета",
+      formula: "λ = v/f"
+    },
+
+    // ---- reverse direction: "где встречается явление X?" ----
+    "Где встречается теплопроводность?": {
+      reply: "Теплопроводность встречается везде, где два предмета соприкасаются, а тепло переходит от горячего к холодному: ложка нагревается в чае, ручка сковородки — на плите, а зимой холодный подоконник забирает тепло у руки, которая до него дотронулась 🥄",
+      animationType: "conduction",
+      caption: "Теплопроводность вокруг нас",
+      formula: "Q = c·m·ΔT"
+    },
+    "Где встречается конвекция?": {
+      reply: "Конвекция — это движение нагретой жидкости или газа. Она происходит, когда суп закипает по краям кастрюли, когда батарея греет всю комнату, стоя внизу у пола, и когда тёплый воздух поднимается к потолку, а холодный опускается вниз 🔥",
+      animationType: "convection",
+      caption: "Конвекция вокруг нас",
+      formula: "Q = c·m·ΔT"
+    },
+    "Где в жизни происходит кипение?": {
+      reply: "Кипение можно увидеть каждый раз, когда закипает чайник или кастрюля с супом на плите. То же самое происходит и на заводах — например, когда выпаривают воду, чтобы получить соль или сахар 🫖",
+      animationType: "heat",
+      caption: "Кипение вокруг нас",
+      formula: "Q = c·m·ΔT"
+    },
+    "Где встречается испарение?": {
+      reply: "Испарение происходит постоянно: лужи после дождя высыхают, мокрое бельё сохнет на верёвке, а пот на коже испаряется и охлаждает тело в жару — именно поэтому в сухом климате жара переносится легче, чем во влажном 💧",
+      animationType: "evaporation",
+      caption: "Испарение вокруг нас",
+      formula: "Q = L·m"
+    },
+    "Где встречается конденсация?": {
+      reply: "Конденсация — это когда пар превращается обратно в капли воды. Так запотевает зеркало после горячего душа, появляются капли на крышке кастрюли и на холодной трубе с водой 🪞",
+      animationType: "condensation",
+      caption: "Конденсация вокруг нас",
+      formula: "Q = L·m"
+    },
+    "Где встречается плавление?": {
+      reply: "Плавление происходит, когда твёрдое вещество превращается в жидкость от нагрева: тает лёд в стакане, мороженое на солнце, воск свечи возле пламени 🍦",
+      animationType: "melting",
+      caption: "Плавление вокруг нас",
+      formula: "Q = λ·m"
+    },
+    "Где встречается замерзание?": {
+      reply: "Замерзание — обратный плавлению процесс: зимой вода в лужах превращается в лёд, на окнах появляются морозные узоры, а из облаков вместо дождя выпадает снег ❄️",
+      animationType: "freezing",
+      caption: "Замерзание вокруг нас",
+      formula: "Q = λ·m"
+    },
+    "Где встречается инерция?": {
+      reply: "Инерция проявляется, когда тело сохраняет своё движение или покой: пассажиров кидает вперёд при резком торможении автобуса, футбольный мяч катится по полю ещё долго после удара, а без ремня безопасности в машине можно по инерции удариться о руль 🚌",
+      animationType: "inertia",
+      caption: "Инерция вокруг нас",
+      formula: "F = m·a"
+    },
+    "Где встречается земное притяжение?": {
+      reply: "Земное притяжение действует на всё вокруг: подброшенный мяч падает обратно, яблоко срывается с ветки, а прыгнув, человек снова возвращается на землю, а не улетает в небо 🍎",
+      animationType: "gravity",
+      caption: "Притяжение вокруг нас",
+      formula: "P = m·g"
+    },
+    "Где используется формула скорости?": {
+      reply: "Формулу скорости используют постоянно: спидометр в машине показывает, сколько километров проезжается за час, тренеры засекают время бегунов на стометровке, а навигатор рассчитывает, сколько времени займёт дорога 🚗",
+      animationType: "speed",
+      caption: "Скорость вокруг нас",
+      formula: "v = s/t"
+    },
+    "Где встречается второй закон Ньютона?": {
+      reply: "Второй закон Ньютона работает везде, где что-то разгоняется или тормозит: тяжёлую тележку в магазине сложнее сдвинуть, чем лёгкую, ракете нужна огромная сила для разгона, а автомобилю с мощным двигателем легче быстро набрать скорость 🚀",
+      animationType: "force",
+      caption: "Второй закон Ньютона вокруг нас",
+      formula: "F = m·a"
+    },
+    "Где встречается трение?": {
+      reply: "Трение встречается на каждом шагу — буквально: подошва обуви трётся об пол, когда мы идём, тормозные колодки трутся о диски в машине, а шины трутся об дорогу, что помогает автомобилю не соскальзывать в повороте 🛞",
+      animationType: "friction",
+      caption: "Трение вокруг нас",
+      formula: "Fтр = μ·N"
+    },
+    "Где встречается закон Гука?": {
+      reply: "Закон Гука работает в любой пружине или упругом материале: в батуте, который подбрасывает вверх, в резинке для волос, в амортизаторах автомобиля и в обычном динамометре, которым измеряют силу 🤸",
+      animationType: "elasticity",
+      caption: "Упругость вокруг нас",
+      formula: "F = k·x"
+    },
+    "Где встречается распространение звука?": {
+      reply: "Звук распространяется в виде волн: он идёт от динамика колонки до наших ушей, отражается от стен пустой комнаты, создавая эхо, и даже превращается в электрический сигнал внутри наушников и обратно в звук 🎵",
+      animationType: "wave",
+      caption: "Звук вокруг нас",
+      formula: "f = v/λ"
+    },
+    "Где встречается магнетизм?": {
+      reply: "Магнетизм используется очень широко: магнит держит записку на дверце холодильника, магнитная застёжка закрывает сумку, а компас с помощью магнитного поля Земли показывает направление на север 🧲",
+      animationType: "magnetism",
+      caption: "Магнетизм вокруг нас",
+      formula: "F = B·I·L"
+    },
+    "Где встречается статическое электричество?": {
+      reply: "Статическое электричество можно заметить, когда волосы тянутся к воздушному шарику или пластмассовой расчёске, а также когда иногда бьёт лёгким током при касании металлической дверной ручки после ходьбы по ковру ⚡",
+      animationType: "static",
+      caption: "Статическое электричество вокруг нас",
+      formula: "F = k·q₁·q₂/r²"
+    },
+    "Где встречается электрический ток?": {
+      reply: "Электрический ток встречается в любом включённом приборе: лампочка загорается, когда через неё идёт ток, зарядка передаёт энергию в телефон, а чайник и утюг нагреваются именно за счёт электрического тока 💡",
+      animationType: "electricity",
+      caption: "Электрический ток вокруг нас",
+      formula: "U = I·R"
+    },
+    "Где встречается электромагнитная индукция?": {
+      reply: "Электромагнитная индукция лежит в основе индукционной плиты, которая нагревает посуду без открытого огня, беспроводной зарядки телефона и генераторов, которые вырабатывают электричество на электростанциях 🍳",
+      animationType: "induction",
+      caption: "Индукция вокруг нас",
+      formula: "Q = I²·R·t"
+    },
+    "Где встречаются электромагнитные волны": {
+      reply: "Электромагнитные волны передают сигнал телефону без проводов, позволяют пульту управлять телевизором на расстоянии и переносят данные через Wi-Fi 📶",
+      animationType: "signal",
+      caption: "Электромагнитные волны вокруг нас",
+      formula: "f = v/λ"
+    },
+    "Где встречается преломление света?": {
+      reply: "Преломление света видно, когда ложка в стакане с водой кажется изогнутой или сломанной, а также в очках и объективах фотоаппаратов, которые с помощью преломления света фокусируют изображение 🥄",
+      animationType: "refraction",
+      caption: "Преломление света вокруг нас",
+      formula: "n = c/v"
+    },
+    "Где встречается отражение света?": {
+      reply: "Отражение света позволяет нам видеть своё отражение в зеркале, замечать блики на поверхности воды и разглядывать витрины магазинов в отражающихся стёклах 🪞",
+      animationType: "reflection",
+      caption: "Отражение света вокруг нас",
+      formula: "n = c/v"
+    },
+    "Где встречается рассеяние света?": {
+      reply: "Рассеяние света делает небо голубым днём и красным на закате, а также создаёт туман, через который свет фар рассеивается во все стороны ☁️",
+      animationType: "scattering",
+      caption: "Рассеяние света вокруг нас",
+      formula: "λ = v/f"
+    },
+    "Где встречается дисперсия света?": {
+      reply: "Дисперсия света — это разложение белого света на цвета радуги. Её видно в радуге после дождя, в лучах, проходящих через стеклянную призму, и в переливах мыльного пузыря 🌈",
+      animationType: "dispersion",
+      caption: "Дисперсия света вокруг нас",
+      formula: "n = c/v"
+    },
+    "Где встречаются линзы?": {
+      reply: "Линзы используются в очках, которые помогают чётче видеть, в объективах фотоаппаратов и телефонов, которые фокусируют изображение, а также в лупах и микроскопах для увеличения мелких предметов 🔍",
+      animationType: "lens",
+      caption: "Линзы вокруг нас",
+      formula: "n = c/v"
+    },
+    "Где встречается давление на практике?": {
+      reply: "Давление объясняет, почему острый каблук проваливается в землю, а широкая лыжа — нет, почему острый нож режет лучше тупого, и почему иглу шприца легко ввести в кожу, ведь у неё очень маленькая площадь кончика 💉",
+      animationType: "pressure",
+      caption: "Давление вокруг нас",
+      formula: "p = F/S"
+    },
+    "Где встречается архимедова сила?": {
+      reply: "Архимедова сила удерживает на плаву корабли и льдины, позволяет подводной лодке всплывать после сброса балласта, а также помогает надувному кругу держать человека на воде 🚢",
+      animationType: "buoyancy",
+      caption: "Архимедова сила вокруг нас",
+      formula: "FA = ρ·g·V"
+    },
+    "Где встречаются колебания маятника?": {
+      reply: "Колебания маятника видны на детских качелях, в старинных часах с маятником, которые отсчитывают время, и в метрономе, который отбивает ритм для музыкантов 🎼",
+      animationType: "pendulum",
+      caption: "Колебания маятника вокруг нас",
+      formula: "T = 2π√(l/g)"
+    }
+  };
+
+  function normalizeQ(s){
+    return (s || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[ёЁ]/g, 'е')
+      .replace(/[«»"'']/g, '')
+      .replace(/\s+/g, ' ')
+      .replace(/[?!.]+$/g, '');
+  }
+  const PRESET_LOOKUP = {};
+  Object.keys(PRESET_ANSWERS).forEach(k => { PRESET_LOOKUP[normalizeQ(k)] = PRESET_ANSWERS[k]; });
+
+  async function sendMessage(text){
+    text = (text || '').trim();
+    if(!text) return;
+    input.value = '';
+    input.style.height = 'auto';
+    sendBtn.disabled = true;
+    addUserBubble(text);
+    addTypingIndicator();
+
+    const preset = PRESET_ANSWERS[text] || PRESET_LOOKUP[normalizeQ(text)];
+    if(preset){
+      // Instant, offline-safe path for the built-in demo questions — perfect for presentations.
+      history.push({role:'user', content:text});
+      history.push({role:'assistant', content: JSON.stringify(preset)});
+      setTimeout(()=>{
+        removeTypingIndicator();
+        const block = addAssistantText(preset.reply);
+        renderScene(block, preset.animationType, preset.caption, preset.formula);
+        sendBtn.disabled = false;
+      }, 550);
+      return;
+    }
+
+    try{
+      const raw = await callClaude(text);
+      removeTypingIndicator();
+      const parsed = parseModelJson(raw);
+      if(parsed){
+        const block = addAssistantText(parsed.reply);
+        renderScene(block, parsed.animationType || pickSceneByText(parsed.reply), parsed.caption || '', parsed.formula || '');
+      } else {
+        const block = addAssistantText(raw || 'Не получилось разобрать ответ, попробуй переформулировать вопрос.');
+        if(raw){ const t = pickSceneByText(raw); renderScene(block, t, '', ''); }
+      }
+    }catch(err){
+      removeTypingIndicator();
+      addAssistantText('Не получилось получить ответ от нейросети 🙏 Возможно, сейчас слишком много запросов — подожди немного и попробуй ещё раз.');
+      console.error(err);
+    }finally{
+      sendBtn.disabled = false;
+    }
+  }
+</script>
+</body>
+</html>
