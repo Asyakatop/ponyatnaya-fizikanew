@@ -77,7 +77,6 @@ exports.handler = async (event) => {
       maxOutputTokens: 2048,
       responseMimeType: 'application/json',
       responseSchema: RESPONSE_SCHEMA,
-      thinkingConfig: { thinkingBudget: 0 },
     },
   };
 
