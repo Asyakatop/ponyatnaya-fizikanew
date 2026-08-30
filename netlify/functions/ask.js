@@ -62,7 +62,7 @@ exports.handler = async (event) => {
     contents,
     generationConfig: {
       temperature: 0.9,
-      maxOutputTokens: 6144,
+      maxOutputTokens: 2048,
       responseMimeType: 'application/json',
       responseSchema: RESPONSE_SCHEMA,
     },
