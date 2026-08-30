@@ -1495,59 +1495,59 @@ const CARD_LIBRARY = [
   };
 
   const FORMULAS = {
-    speed: "v = \frac{s}{t}",
+    speed: "v = \\frac{s}{t}",
     force: "F = ma",
     gravity: "P = mg",
-    pendulum: "T = 2\pi\sqrt{\frac{l}{g}}",
-    wave: "f = \frac{v}{\lambda}",
-    refraction: "n = \frac{c}{v}",
-    scattering: "\lambda = \frac{v}{f}",
-    friction: "F_{\text{тр}} = \mu N",
-    pressure: "p = \frac{F}{S}",
-    heat: "Q = cm\Delta T",
-    conduction: "Q = cm\Delta T",
+    pendulum: "T = 2\\pi\\sqrt{\\frac{l}{g}}",
+    wave: "f = \\frac{v}{\\lambda}",
+    refraction: "n = \\frac{c}{v}",
+    scattering: "\\lambda = \\frac{v}{f}",
+    friction: "F_{\\text{тр}} = \\mu N",
+    pressure: "p = \\frac{F}{S}",
+    heat: "Q = cm\\Delta T",
+    conduction: "Q = cm\\Delta T",
     electricity: "U = IR",
-    buoyancy: "F_A = \rho g V",
+    buoyancy: "F_A = \\rho g V",
     magnetism: "F = BIL",
     elasticity: "F = kx",
     inertia: "F = ma",
     condensation: "Q = Lm",
-    convection: "Q = cm\Delta T",
+    convection: "Q = cm\\Delta T",
     evaporation: "Q = Lm",
-    melting: "Q = \lambda m",
-    freezing: "Q = \lambda m",
-    static: "F = \frac{kq_1 q_2}{r^2}",
-    signal: "\lambda = \frac{c}{f}",
-    reflection: "\theta_1 = \theta_2",
-    dispersion: "n = \frac{c}{v}",
-    lens: "\frac{1}{f} = \frac{1}{d_0} + \frac{1}{d_i}",
-    induction: "\varepsilon = -\frac{\Delta\Phi}{\Delta t}",
-    equilibrium: "Q = cm\Delta T",
-    comparison: "Q = cm\Delta T",
-    traction: "F_{\text{тр}} = \mu N",
-    echo: "f = \frac{v}{\lambda}",
-    headphones: "f = \frac{v}{\lambda}",
-    seismograph: "f = \frac{1}{T}",
-    rolling: "F_{\text{тр}} = \mu N",
-    sea: "\lambda = \frac{v}{f}",
-    remote: "\lambda = \frac{c}{f}",
-    boat: "F_A = \rho g V",
-    submarine: "F_A = \rho g V",
-    ventHood: "Q = cm\Delta T",
+    melting: "Q = \\lambda m",
+    freezing: "Q = \\lambda m",
+    static: "F = \\frac{kq_1 q_2}{r^2}",
+    signal: "\\lambda = \\frac{c}{f}",
+    reflection: "\\theta_1 = \\theta_2",
+    dispersion: "n = \\frac{c}{v}",
+    lens: "\\frac{1}{f} = \\frac{1}{d_0} + \\frac{1}{d_i}",
+    induction: "\\varepsilon = -\\frac{\\Delta\\Phi}{\\Delta t}",
+    equilibrium: "Q = cm\\Delta T",
+    comparison: "Q = cm\\Delta T",
+    traction: "F_{\\text{тр}} = \\mu N",
+    echo: "f = \\frac{v}{\\lambda}",
+    headphones: "f = \\frac{v}{\\lambda}",
+    seismograph: "f = \\frac{1}{T}",
+    rolling: "F_{\\text{тр}} = \\mu N",
+    sea: "\\lambda = \\frac{v}{f}",
+    remote: "\\lambda = \\frac{c}{f}",
+    boat: "F_A = \\rho g V",
+    submarine: "F_A = \\rho g V",
+    ventHood: "Q = cm\\Delta T",
     trampoline: "F = kx",
     dynamometer: "F = kx",
-    comb: "F = \frac{kq_1 q_2}{r^2}",
-    doorSpark: "F = \frac{kq_1 q_2}{r^2}",
-    grounding: "F = \frac{kq_1 q_2}{r^2}",
+    comb: "F = \\frac{kq_1 q_2}{r^2}",
+    doorSpark: "F = \\frac{kq_1 q_2}{r^2}",
+    grounding: "F = \\frac{kq_1 q_2}{r^2}",
     humidity: "Q = Lm",
-    kettle: "Q = cm\Delta T",
+    kettle: "Q = cm\\Delta T",
     lid: "Q = Lm",
     mirror: "Q = Lm",
-    seasons: "Q = \lambda m",
+    seasons: "Q = \\lambda m",
     saucer: "Q = Lm",
     seatbelt: "F = ma",
     clasp: "F = BIL",
-    generic: "E = h\nu"
+    generic: "E = h\\nu"
   };
 
   const SCENE_KEYWORDS = {
@@ -1673,28 +1673,28 @@ const CARD_LIBRARY = [
 Тебе присылают бытовую ситуацию или вопрос про физическое явление. Твоя задача — либо объяснить, какое физическое явление скрывается за описанной ситуацией, либо привести жизненный пример явления, которое назвал пользователь. Уровень — школьная физика 7-9 класса.
 
 Отвечай ТОЛЬКО валидным JSON без markdown-разметки и без пояснений вокруг, строго в формате:
-{"reply": "объяснение простым, живым и дружелюбным языком, 2-4 предложения, для школьников, плюс в конце обязательно короткое пояснение самой формулы: что означает каждая буква в ней", "caption": "короткая подпись к анимации, 3-6 слов", "formula": "формула из справочника ниже в формате LaTeX (см. требования к формату ниже), например F = \frac{kq_1 q_2}{r^2}", "animation_svg": "самостоятельный SVG с анимацией, см. требования ниже"}
+{"reply": "объяснение простым, живым и дружелюбным языком, 2-4 предложения, для школьников, плюс в конце обязательно короткое пояснение самой формулы: что означает каждая буква в ней", "caption": "короткая подпись к анимации, 3-6 слов", "formula": "формула из справочника ниже в формате LaTeX (см. требования к формату ниже), например F = \\frac{kq_1 q_2}{r^2}", "animation_svg": "самостоятельный SVG с анимацией, см. требования ниже"}
 
-Формат поля "formula" — LaTeX, без знаков $ и без окружений \[ \] или \( \):
-- дроби через \frac{числитель}{знаменатель}, корень через \sqrt{...}, дельту через \Delta, греческие буквы через \lambda \mu \pi \rho \eta \nu \varepsilon \Phi и т.п.
-- нижние индексы через _{...}, степени через ^{...}; если индекс — русское слово или сокращение (не одна буква), оборачивай его в \text{...}, например F_{\text{тр}}, Q_{\text{отд}}.
+Формат поля "formula" — LaTeX, без знаков $ и без окружений \\[ \\] или \\( \\):
+- дроби через \\frac{числитель}{знаменатель}, корень через \\sqrt{...}, дельту через \\Delta, греческие буквы через \\lambda \\mu \\pi \\rho \\eta \\nu \\varepsilon \\Phi и т.п.
+- нижние индексы через _{...}, степени через ^{...}; если индекс — русское слово или сокращение (не одна буква), оборачивай его в \\text{...}, например F_{\\text{тр}}, Q_{\\text{отд}}.
 - копируй формулу из справочника ниже как есть, не переводи её обратно в обычный текст.
 Справочник формул физики 7-9 класса (выбирай самую подходящую формулу из этого списка; можно использовать похожие обозначения, но не выдумывай темы, которых нет в школьной программе):
-Кинематика: v = \frac{s}{t}; s = vt; a = \frac{v-v_0}{t}; v = v_0+at; s = v_0 t + \frac{at^2}{2}.
-Свободное падение: v = gt; h = \frac{gt^2}{2}.
-Масса/плотность: \rho = \frac{m}{V}.
-Силы: F_{\text{тяж}} = mg; P = mg (вес); F_{\text{упр}} = kx (закон Гука); F_{\text{тр}} = \mu N;
-второй закон Ньютона: F = ma; закон всемирного тяготения: F = \frac{Gm_1 m_2}{r^2}.
-Давление: p = \frac{F}{S}; p = \rho g h; F_{\text{Арх}} = \rho_{\text{ж}} g V (закон Архимеда).
-Работа/энергия: A = Fs; N = \frac{A}{t}; \eta = \frac{A_{\text{полезн}}}{A_{\text{затрач}}}\cdot 100\%; E_{\text{к}} = \frac{mv^2}{2}; E_{\text{п}} = mgh.
+Кинематика: v = \\frac{s}{t}; s = vt; a = \\frac{v-v_0}{t}; v = v_0+at; s = v_0 t + \\frac{at^2}{2}.
+Свободное падение: v = gt; h = \\frac{gt^2}{2}.
+Масса/плотность: \\rho = \\frac{m}{V}.
+Силы: F_{\\text{тяж}} = mg; P = mg (вес); F_{\\text{упр}} = kx (закон Гука); F_{\\text{тр}} = \\mu N;
+второй закон Ньютона: F = ma; закон всемирного тяготения: F = \\frac{Gm_1 m_2}{r^2}.
+Давление: p = \\frac{F}{S}; p = \\rho g h; F_{\\text{Арх}} = \\rho_{\\text{ж}} g V (закон Архимеда).
+Работа/энергия: A = Fs; N = \\frac{A}{t}; \\eta = \\frac{A_{\\text{полезн}}}{A_{\\text{затрач}}}\\cdot 100\\%; E_{\\text{к}} = \\frac{mv^2}{2}; E_{\\text{п}} = mgh.
 Импульс: p = mv; закон сохранения импульса: m_1 v_1+m_2 v_2 = m_1 v_1'+m_2 v_2'.
-Тепловые явления: Q = cm\Delta T (нагревание/охлаждение); Q = \lambda m (плавление);
+Тепловые явления: Q = cm\\Delta T (нагревание/охлаждение); Q = \\lambda m (плавление);
 Q = Lm (парообразование/конденсация); Q = qm (сгорание топлива).
-Электричество: I = \frac{q}{t}; U = \frac{A}{q}; R = \frac{U}{I} (закон Ома); A = UIt; P = UI; Q = I^2 R t (закон Джоуля-Ленца).
-Оптика: угол падения = углу отражения; \frac{1}{F} = \frac{1}{d} + \frac{1}{f} (линза); n = \frac{c}{v} (преломление).
-Колебания и волны: T = \frac{t}{N}; \nu = \frac{1}{T}; v = \lambda\nu; для маятника T = 2\pi\sqrt{\frac{l}{g}}.
-Звук: v = \lambda\nu; s = vt (расстояние по звуку); s = \frac{vt}{2} (эхо).
-Магнетизм и статика: F = \frac{kq_1 q_2}{r^2} (закон Кулона); магнитное взаимодействие — качественно, без формулы, если её не проходят в 7-9 классе.
+Электричество: I = \\frac{q}{t}; U = \\frac{A}{q}; R = \\frac{U}{I} (закон Ома); A = UIt; P = UI; Q = I^2 R t (закон Джоуля-Ленца).
+Оптика: угол падения = углу отражения; \\frac{1}{F} = \\frac{1}{d} + \\frac{1}{f} (линза); n = \\frac{c}{v} (преломление).
+Колебания и волны: T = \\frac{t}{N}; \\nu = \\frac{1}{T}; v = \\lambda\\nu; для маятника T = 2\\pi\\sqrt{\\frac{l}{g}}.
+Звук: v = \\lambda\\nu; s = vt (расстояние по звуку); s = \\frac{vt}{2} (эхо).
+Магнетизм и статика: F = \\frac{kq_1 q_2}{r^2} (закон Кулона); магнитное взаимодействие — качественно, без формулы, если её не проходят в 7-9 классе.
 
 Требования к "animation_svg" (важно: ответ должен генерироваться быстро, поэтому анимация должна быть КОРОТКОЙ и ПРОСТОЙ):
 - Это должна быть ЗАНОВО придуманная тобой анимация именно под эту конкретную ситуацию — не шаблон и не переиспользование одной и той же схемы для разных явлений.
