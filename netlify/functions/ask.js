@@ -8,27 +8,15 @@
 //   response body:  { content: [{ type: 'text', text: string }] }  — mimics the
 //                   shape the front-end already expects from a Messages-API-style call.
 
-const ANIMATION_TYPES = [
-  'speed', 'force', 'gravity', 'pendulum', 'wave', 'refraction', 'scattering',
-  'friction', 'pressure', 'heat', 'conduction', 'electricity', 'buoyancy',
-  'magnetism', 'elasticity', 'inertia', 'condensation', 'convection',
-  'evaporation', 'melting', 'freezing', 'static', 'signal', 'reflection',
-  'dispersion', 'lens', 'induction', 'equilibrium', 'comparison', 'traction',
-  'echo', 'headphones', 'seismograph', 'rolling', 'sea', 'remote', 'boat',
-  'submarine', 'ventHood', 'trampoline', 'dynamometer', 'comb', 'doorSpark',
-  'grounding', 'humidity', 'kettle', 'lid', 'mirror', 'seasons', 'saucer',
-  'seatbelt', 'clasp', 'generic',
-];
-
 const RESPONSE_SCHEMA = {
   type: 'OBJECT',
   properties: {
     reply: { type: 'STRING' },
-    animationType: { type: 'STRING', enum: ANIMATION_TYPES },
     caption: { type: 'STRING' },
     formula: { type: 'STRING' },
+    animation_svg: { type: 'STRING' },
   },
-  required: ['reply', 'animationType', 'caption', 'formula'],
+  required: ['reply', 'caption', 'formula', 'animation_svg'],
 };
 
 exports.handler = async (event) => {
@@ -111,10 +99,26 @@ exports.handler = async (event) => {
       return { statusCode: 502, body: JSON.stringify({ error: 'Нейросеть вернула пустой ответ' }) };
     }
 
+    let safeText = text;
+    try {
+      const parsedAnswer = JSON.parse(text);
+      if (typeof parsedAnswer.animation_svg === 'string') {
+        parsedAnswer.animation_svg = parsedAnswer.animation_svg
+          .replace(/<script[\s\S]*?<\/script>/gi, '')
+          .replace(/<foreignObject[\s\S]*?<\/foreignObject>/gi, '')
+          .replace(/\son\w+\s*=\s*"[^"]*"/gi, '')
+          .replace(/\son\w+\s*=\s*'[^']*'/gi, '')
+          .replace(/(href\s*=\s*["'])\s*javascript:[^"']*/gi, '$1');
+      }
+      safeText = JSON.stringify(parsedAnswer);
+    } catch (e) {
+      // If it isn't valid JSON, pass it through as-is; the front-end handles that case too.
+    }
+
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: [{ type: 'text', text }] }),
+      body: JSON.stringify({ content: [{ type: 'text', text: safeText }] }),
     };
   } catch (err) {
     return { statusCode: 500, body: JSON.stringify({ error: 'Внутренняя ошибка сервера' }) };
