@@ -1708,14 +1708,21 @@ Q = Lm (парообразование/конденсация); Q = qm (сгор
 
   async function callClaude(userText){
     const outgoing = [...history, {role:'user', content: userText}];
-    const res = await fetch("/.netlify/functions/ask", {
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({
-        system: SYSTEM_PROMPT,
-        messages: outgoing
-      })
-    });
+    let res;
+    try{
+      res = await fetch("/.netlify/functions/ask", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+          system: SYSTEM_PROMPT,
+          messages: outgoing
+        })
+      });
+    }catch(networkErr){
+      const err = new Error('Не удалось связаться с сервером: ' + networkErr.message);
+      err.isNetworkError = true;
+      throw err;
+    }
     if(!res.ok){
       let bodyText = '';
       try{ bodyText = await res.text(); }catch(e){}
@@ -2287,7 +2294,11 @@ Q = Lm (парообразование/конденсация); Q = qm (сгор
       }
     }catch(err){
       removeTypingIndicator();
-      addAssistantText('Не получилось получить ответ от нейросети 🙏 Возможно, сейчас слишком много запросов — подожди немного и попробуй ещё раз.');
+      if(err.isNetworkError){
+        addAssistantText('Не получилось связаться с сервером 🌐 Похоже, дело не в нейросети, а в подключении к интернету на этом устройстве — проверь связь, отключи VPN или блокировщик рекламы, если он есть, и попробуй ещё раз.');
+      } else {
+        addAssistantText('Не получилось получить ответ от нейросети 🙏 Возможно, сейчас слишком много запросов — подожди немного и попробуй ещё раз.');
+      }
       console.error(err);
     }finally{
       sendBtn.disabled = false;
