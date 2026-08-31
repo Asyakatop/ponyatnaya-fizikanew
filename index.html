@@ -1711,9 +1711,12 @@ Q = Lm (парообразование/конденсация); Q = qm (сгор
     const outgoing = [...history, {role:'user', content: userText}];
     let res;
     try{
-      res = await fetch("/.netlify/functions/ask", {
+      // A cache-busting query param guards against carrier/ISP proxies that
+      // cache POST responses by URL alone and ignore the request body,
+      // which would otherwise replay a stale answer for every question.
+      res = await fetch("/.netlify/functions/ask?_=" + Date.now() + Math.random().toString(36).slice(2), {
         method:"POST",
-        headers:{"Content-Type":"application/json"},
+        headers:{"Content-Type":"application/json", "Cache-Control":"no-cache"},
         body: JSON.stringify({
           system: SYSTEM_PROMPT,
           messages: outgoing
