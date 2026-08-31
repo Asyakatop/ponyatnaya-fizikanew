@@ -19,34 +19,48 @@ const RESPONSE_SCHEMA = {
   required: ['reply', 'caption', 'formula', 'animation_svg'],
 };
 
+// Every reply carries these — some ISP/carrier proxies cache POST responses
+// by URL alone (ignoring the request body) and would otherwise replay a
+// stale answer for every question that follows.
+const NO_CACHE_HEADERS = {
+  'Content-Type': 'application/json',
+  'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+  Pragma: 'no-cache',
+};
+
+function json(statusCode, bodyObj, extraHeaders) {
+  return {
+    statusCode,
+    headers: Object.assign({}, NO_CACHE_HEADERS, extraHeaders),
+    body: JSON.stringify(bodyObj),
+  };
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: JSON.stringify({ error: 'Метод не поддерживается' }) };
+    return json(405, { error: 'Метод не поддерживается' });
   }
 
   let payload;
   try {
     payload = JSON.parse(event.body || '{}');
   } catch (e) {
-    return { statusCode: 400, body: JSON.stringify({ error: 'Некорректный запрос' }) };
+    return json(400, { error: 'Некорректный запрос' });
   }
 
   const { system, messages } = payload;
   if (!system || typeof system !== 'string' || !Array.isArray(messages) || messages.length === 0) {
-    return { statusCode: 400, body: JSON.stringify({ error: 'Отсутствует system или messages' }) };
+    return json(400, { error: 'Отсутствует system или messages' });
   }
 
   const lastUserText = messages[messages.length - 1] && messages[messages.length - 1].content;
   if (typeof lastUserText !== 'string' || lastUserText.length > 500) {
-    return { statusCode: 400, body: JSON.stringify({ error: 'Некорректный вопрос' }) };
+    return json(400, { error: 'Некорректный вопрос' });
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'Сервер не настроен: не задан GEMINI_API_KEY в переменных окружения Netlify' }),
-    };
+    return json(500, { error: 'Сервер не настроен: не задан GEMINI_API_KEY в переменных окружения Netlify' });
   }
 
   const model = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
@@ -76,18 +90,12 @@ exports.handler = async (event) => {
     });
 
     if (geminiResp.status === 429) {
-      return {
-        statusCode: 429,
-        body: JSON.stringify({ error: 'Сейчас слишком много запросов к нейросети. Подождите немного и попробуйте снова.' }),
-      };
+      return json(429, { error: 'Сейчас слишком много запросов к нейросети. Подождите немного и попробуйте снова.' });
     }
 
     if (!geminiResp.ok) {
       const errText = await geminiResp.text();
-      return {
-        statusCode: 502,
-        body: JSON.stringify({ error: 'Нейросеть недоступна, попробуйте позже.', detail: errText.slice(0, 300) }),
-      };
+      return json(502, { error: 'Нейросеть недоступна, попробуйте позже.', detail: errText.slice(0, 300) });
     }
 
     const data = await geminiResp.json();
@@ -96,7 +104,7 @@ exports.handler = async (event) => {
       data.candidates[0].content.parts[0].text;
 
     if (!text) {
-      return { statusCode: 502, body: JSON.stringify({ error: 'Нейросеть вернула пустой ответ' }) };
+      return json(502, { error: 'Нейросеть вернула пустой ответ' });
     }
 
     let safeText = text;
@@ -115,12 +123,8 @@ exports.handler = async (event) => {
       // If it isn't valid JSON, pass it through as-is; the front-end handles that case too.
     }
 
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: [{ type: 'text', text: safeText }] }),
-    };
+    return json(200, { content: [{ type: 'text', text: safeText }] });
   } catch (err) {
-    return { statusCode: 500, body: JSON.stringify({ error: 'Внутренняя ошибка сервера' }) };
+    return json(500, { error: 'Внутренняя ошибка сервера' });
   }
 };
