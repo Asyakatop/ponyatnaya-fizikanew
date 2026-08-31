@@ -1719,7 +1719,9 @@ Q = Lm (парообразование/конденсация); Q = qm (сгор
     if(!res.ok){
       let bodyText = '';
       try{ bodyText = await res.text(); }catch(e){}
-      throw new Error(`HTTP ${res.status} ${res.statusText} — ${bodyText.slice(0,300)}`);
+      const err = new Error(`HTTP ${res.status} ${res.statusText} — ${bodyText.slice(0,300)}`);
+      err.status = res.status;
+      throw err;
     }
     const data = await res.json();
     const textBlock = (data.content || []).find(b => b.type === 'text');
@@ -2261,7 +2263,20 @@ Q = Lm (парообразование/конденсация); Q = qm (сгор
     }
 
     try{
-      const raw = await callClaude(text);
+      let raw;
+      try{
+        raw = await callClaude(text);
+      }catch(err){
+        if(err.status === 429){
+          removeTypingIndicator();
+          addAssistantText('Сейчас слишком много запросов к нейросети — подожду немного и попробую ещё раз автоматически, это займёт около минуты...');
+          await new Promise(r => setTimeout(r, 65000));
+          addTypingIndicator();
+          raw = await callClaude(text);
+        } else {
+          throw err;
+        }
+      }
       removeTypingIndicator();
       const parsed = parseModelJson(raw);
       if(parsed){
