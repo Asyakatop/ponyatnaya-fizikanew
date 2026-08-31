@@ -1678,6 +1678,7 @@ const CARD_LIBRARY = [
 Формат поля "formula" — LaTeX, без знаков $ и без окружений \\[ \\] или \\( \\):
 - дроби через \\frac{числитель}{знаменатель}, корень через \\sqrt{...}, дельту через \\Delta, греческие буквы через \\lambda \\mu \\pi \\rho \\eta \\nu \\varepsilon \\Phi и т.п.
 - нижние индексы через _{...}, степени через ^{...}; если индекс — русское слово или сокращение (не одна буква), оборачивай его в \\text{...}, например F_{\\text{тр}}, Q_{\\text{отд}}.
+- ВАЖНО про JSON: значение "formula" — это строка внутри JSON, поэтому каждый обратный слэш LaTeX-команды нужно экранировать как двойной обратный слэш (\\\\), иначе JSON станет невалидным. Пиши \\\\frac, \\\\Delta, \\\\lambda и т.п. — не одинарный слэш.
 - копируй формулу из справочника ниже как есть, не переводи её обратно в обычный текст.
 Справочник формул физики 7-9 класса (выбирай самую подходящую формулу из этого списка; можно использовать похожие обозначения, но не выдумывай темы, которых нет в школьной программе):
 Кинематика: v = \\frac{s}{t}; s = vt; a = \\frac{v-v_0}{t}; v = v_0+at; s = v_0 t + \\frac{at^2}{2}.
@@ -1740,11 +1741,26 @@ Q = Lm (парообразование/конденсация); Q = qm (сгор
 
   function parseModelJson(raw){
     let cleaned = raw.trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
-    try{
-      const obj = JSON.parse(cleaned);
-      if(obj && obj.reply) return obj;
-    }catch(e){ /* fall through */ }
-    return null;
+
+    function tryParse(text){
+      try{
+        const obj = JSON.parse(text);
+        return (obj && obj.reply) ? obj : null;
+      }catch(e){ return null; }
+    }
+
+    // The model sometimes emits LaTeX backslashes (\frac, \theta, \rho, \Delta, ...)
+    // without doubling them for JSON. Some of these break JSON.parse outright
+    // (\Delta, \lambda, ...); others are silently swallowed as real JSON escapes
+    // (\t, \r, \f, \n) and turn "\frac"/"\theta"/"\rho" into stray control
+    // characters instead of throwing. Repair by doubling any lone backslash
+    // immediately followed by 2+ letters — a real JSON escape is never that shape.
+    const repaired = cleaned.replace(/(?<!\\)\\(?=[a-zA-Z]{2,})/g, '\\\\');
+    const direct = tryParse(cleaned);
+    const fixed = tryParse(repaired);
+    const looksCorrupted = (obj) => obj && /[\x00-\x1F]/.test((obj.formula || '') + (obj.reply || ''));
+    if (fixed && (!direct || looksCorrupted(direct))) return fixed;
+    return direct || fixed;
   }
 
   // ---------- preset answers for the demo/example questions — instant, no internet needed ----------
@@ -2290,7 +2306,8 @@ Q = Lm (парообразование/конденсация); Q = qm (сгор
         const block = addAssistantText(parsed.reply);
         renderCustomScene(block, parsed.animation_svg, parsed.caption || '', parsed.formula || '');
       } else {
-        const block = addAssistantText(raw || 'Не получилось разобрать ответ, попробуй переформулировать вопрос.');
+        addAssistantText('Не получилось разобрать ответ от нейросети, попробуй переформулировать вопрос.');
+        console.error('Unparseable model response:', raw);
       }
     }catch(err){
       removeTypingIndicator();
