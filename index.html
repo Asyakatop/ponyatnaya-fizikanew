@@ -1651,14 +1651,13 @@ const CARD_LIBRARY = [
     let svg = typeof svgMarkup === 'string' ? svgMarkup : '';
     svg = sanitizeSvg(svg);
     if (!/^\s*<svg[\s>]/i.test(svg)) svg = SCENES.generic;
-    const f = formula || FORMULAS.generic;
     const card = document.createElement('div');
     card.className = 'scene-card';
     card.innerHTML = `<div class="scene-svg-wrap">${svg}</div>
       ${caption ? `<p class="scene-caption">${escapeHtml(caption)}</p>` : ''}
-      <div class="scene-formula-wrap"><span class="scene-formula"></span></div>`;
+      ${formula ? `<div class="scene-formula-wrap"><span class="scene-formula"></span></div>` : ''}`;
     block.appendChild(card);
-    renderFormula(card.querySelector('.scene-formula'), f);
+    if (formula) renderFormula(card.querySelector('.scene-formula'), formula);
     scrollDown();
   }
 
@@ -1673,14 +1672,18 @@ const CARD_LIBRARY = [
 Тебе присылают бытовую ситуацию или вопрос про физическое явление. Твоя задача — либо объяснить, какое физическое явление скрывается за описанной ситуацией, либо привести жизненный пример явления, которое назвал пользователь. Уровень — школьная физика 7-9 класса.
 
 Отвечай ТОЛЬКО валидным JSON без markdown-разметки и без пояснений вокруг, строго в формате:
-{"reply": "объяснение простым, живым и дружелюбным языком, 2-4 предложения, для школьников, плюс в конце обязательно короткое пояснение самой формулы: что означает каждая буква в ней", "caption": "короткая подпись к анимации, 3-6 слов", "formula": "формула из справочника ниже в формате LaTeX (см. требования к формату ниже), например F = \\frac{kq_1 q_2}{r^2}", "animation_svg": "самостоятельный SVG с анимацией, см. требования ниже"}
+{"reply": "объяснение простым, живым и дружелюбным языком, 2-4 предложения, для школьников; ЕСЛИ указываешь формулу в поле formula — добавь в конце короткое пояснение, что означает каждая буква, обычным текстом (см. правило ниже); если формулы нет — пояснение не нужно", "caption": "короткая подпись к анимации, 3-6 слов", "formula": "формула из справочника ниже в формате LaTeX (см. требования к формату ниже) ИЛИ пустая строка \"\", если ни одна формула из справочника не подходит по смыслу — см. правило ниже", "animation_svg": "самостоятельный SVG с анимацией, см. требования ниже"}
 
-Формат поля "formula" — LaTeX, без знаков $ и без окружений \\[ \\] или \\( \\):
+ВАЖНОЕ ПРАВИЛО про поле "reply": это обычный читаемый текст, а не LaTeX. Никогда не пиши в нём LaTeX-команды с обратным слэшем (\\rho, \\Delta, \\frac и т.п.) — там они не отображаются как символы, а показываются как есть. Греческие буквы и обозначения пиши прямо как символ или словом: ρ, Δ, λ, "плотность", "дельта" и т.п. LaTeX-команды с обратным слэшем допустимы ТОЛЬКО внутри поля "formula".
+
+ВАЖНОЕ ПРАВИЛО про поле "formula": формула должна быть добавлена, только если она НАПРЯМУЮ и ТОЧНО описывает физику именно этой ситуации. Если подходящей формулы в справочнике ниже нет — не притягивай отдалённо похожую формулу и не выдумывай свою, а оставь "formula" пустой строкой "". Пустая формула — абсолютно нормальный и частый ответ, лучше пустая формула, чем формула не по теме.
+
+Формат поля "formula", когда оно не пустое, — LaTeX, без знаков $ и без окружений \\[ \\] или \\( \\):
 - дроби через \\frac{числитель}{знаменатель}, корень через \\sqrt{...}, дельту через \\Delta, греческие буквы через \\lambda \\mu \\pi \\rho \\eta \\nu \\varepsilon \\Phi и т.п.
 - нижние индексы через _{...}, степени через ^{...}; если индекс — русское слово или сокращение (не одна буква), оборачивай его в \\text{...}, например F_{\\text{тр}}, Q_{\\text{отд}}.
 - ВАЖНО про JSON: значение "formula" — это строка внутри JSON, поэтому каждый обратный слэш LaTeX-команды нужно экранировать как двойной обратный слэш (\\\\), иначе JSON станет невалидным. Пиши \\\\frac, \\\\Delta, \\\\lambda и т.п. — не одинарный слэш.
 - копируй формулу из справочника ниже как есть, не переводи её обратно в обычный текст.
-Справочник формул физики 7-9 класса (выбирай самую подходящую формулу из этого списка; можно использовать похожие обозначения, но не выдумывай темы, которых нет в школьной программе):
+Справочник формул физики 7-9 класса (выбирай самую подходящую формулу из этого списка, только если она точно относится к ситуации; можно использовать похожие обозначения, но не выдумывай темы, которых нет в школьной программе):
 Кинематика: v = \\frac{s}{t}; s = vt; a = \\frac{v-v_0}{t}; v = v_0+at; s = v_0 t + \\frac{at^2}{2}.
 Свободное падение: v = gt; h = \\frac{gt^2}{2}.
 Масса/плотность: \\rho = \\frac{m}{V}.
@@ -2313,13 +2316,27 @@ Q = Lm (парообразование/конденсация); Q = qm (сгор
         }
       }
       removeTypingIndicator();
-      const parsed = parseModelJson(raw);
+      let parsed = parseModelJson(raw);
+      if(!parsed){
+        // The model occasionally emits malformed JSON (truncated output, a stray
+        // unescaped character in the generated SVG). This is non-deterministic,
+        // so a single silent retry recovers most of these without bothering the
+        // user with a dead-end error for something that usually just works
+        // on the next try.
+        console.error('Unparseable model response, retrying once:', raw);
+        addTypingIndicator();
+        try{
+          raw = await callClaude(text);
+          parsed = parseModelJson(raw);
+        }catch(e){ /* keep parsed as null; falls through to the error message below */ }
+        removeTypingIndicator();
+      }
       if(parsed){
         const block = addAssistantText(parsed.reply);
         renderCustomScene(block, parsed.animation_svg, parsed.caption || '', parsed.formula || '');
       } else {
         addAssistantText('Не получилось разобрать ответ от нейросети, попробуй переформулировать вопрос.');
-        console.error('Unparseable model response:', raw);
+        console.error('Unparseable model response after retry:', raw);
       }
     }catch(err){
       removeTypingIndicator();
