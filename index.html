@@ -1707,21 +1707,52 @@ Q = Lm (парообразование/конденсация); Q = qm (сгор
 
 Ответ "reply" — не более 2-3 коротких предложений. Пиши только на русском языке. Никогда не добавляй текст до или после JSON. Будь краток везде, где это возможно, — от этого зависит скорость ответа.`;
 
+  // Talks directly to Gemini from the browser instead of through a Netlify/
+  // Cloudflare serverless proxy. Both of those proxies turned out to be
+  // unreachable for some users inside Russia regardless of the domain name
+  // used, because the blocking targets the hosting platform's network/IP
+  // range itself, not the hostname — so any middleman hosted there is a
+  // dead end. Calling Google's own API domain directly removes that
+  // middleman from the request path entirely.
+  const GEMINI_API_KEY = "ВСТАВЬТЕ_СЮДА_ВАШ_GEMINI_API_KEY";
+  const GEMINI_MODEL = "gemini-3.6-flash";
+  const RESPONSE_SCHEMA = {
+    type: 'OBJECT',
+    properties: {
+      reply: { type: 'STRING' },
+      caption: { type: 'STRING' },
+      formula: { type: 'STRING' },
+      animation_svg: { type: 'STRING' },
+    },
+    required: ['reply', 'caption', 'formula', 'animation_svg'],
+  };
+
   async function callClaude(userText){
     const outgoing = [...history, {role:'user', content: userText}];
+    const contents = outgoing.map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: String(m.content || '') }]
+    }));
+    const requestBody = {
+      system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      contents,
+      generationConfig: {
+        temperature: 0.9,
+        maxOutputTokens: 2048,
+        responseMimeType: 'application/json',
+        responseSchema: RESPONSE_SCHEMA,
+      },
+    };
     let res;
     try{
-      // A cache-busting query param guards against carrier/ISP proxies that
-      // cache POST responses by URL alone and ignore the request body,
-      // which would otherwise replay a stale answer for every question.
-      res = await fetch("/.netlify/functions/ask?_=" + Date.now() + Math.random().toString(36).slice(2), {
-        method:"POST",
-        headers:{"Content-Type":"application/json", "Cache-Control":"no-cache"},
-        body: JSON.stringify({
-          system: SYSTEM_PROMPT,
-          messages: outgoing
-        })
-      });
+      res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body: JSON.stringify(requestBody)
+        }
+      );
     }catch(networkErr){
       const err = new Error('Не удалось связаться с сервером: ' + networkErr.message);
       err.isNetworkError = true;
@@ -1735,8 +1766,9 @@ Q = Lm (парообразование/конденсация); Q = qm (сгор
       throw err;
     }
     const data = await res.json();
-    const textBlock = (data.content || []).find(b => b.type === 'text');
-    const raw = textBlock ? textBlock.text : '';
+    const part = data.candidates && data.candidates[0] && data.candidates[0].content &&
+      data.candidates[0].content.parts && data.candidates[0].content.parts[0];
+    const raw = part ? part.text : '';
     history.push({role:'user', content: userText});
     history.push({role:'assistant', content: raw});
     return raw;
