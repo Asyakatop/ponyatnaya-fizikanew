@@ -1,11 +1,6 @@
-// Vercel serverless function — adapted from netlify/functions/ask.js and
-// functions/.netlify/functions/ask.js (Cloudflare). Runs on Vercel's own
-// infrastructure (outside Russia), so Gemini always sees a non-Russian
-// caller IP regardless of where the site visitor actually is, and keeps
-// the API key on the server instead of exposed in the browser.
-//
-// The front-end (hosted separately on GitHub Pages) calls this as a
-// cross-origin request, so CORS headers are required here.
+// Vercel serverless function. Runs outside Russia, so Gemini always sees a
+// non-Russian caller IP, and keeps the API key on the server. The front-end
+// (GitHub Pages) calls it cross-origin, hence the CORS headers.
 
 const RESPONSE_SCHEMA = {
   type: 'OBJECT',
@@ -31,6 +26,92 @@ function setCommonHeaders(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   res.setHeader('Pragma', 'no-cache');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+}
+
+// Per-instance, in-memory limit: not a hard global cap (instances are
+// recycled and scaled), but stops one script hammering a single instance.
+// Kept generous because a whole class can share one school IP.
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX = 30;
+const requestLog = new Map();
+
+function isRateLimited(ip) {
+  const now = Date.now();
+  const timestamps = (requestLog.get(ip) || []).filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
+  timestamps.push(now);
+  requestLog.set(ip, timestamps);
+  return timestamps.length > RATE_LIMIT_MAX;
+}
+
+// Gemini regularly answers 503 "high demand" for a single model, so each
+// request walks a chain of models until one gives a usable answer.
+const PRIMARY_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
+const FALLBACK_MODELS = (process.env.GEMINI_FALLBACK_MODELS || 'gemini-flash-latest,gemini-flash-lite-latest')
+  .split(',').map((s) => s.trim()).filter(Boolean);
+const MODEL_CHAIN = [PRIMARY_MODEL, ...FALLBACK_MODELS.filter((m) => m !== PRIMARY_MODEL)];
+
+const ATTEMPT_TIMEOUT_MS = 20000;
+const TOTAL_BUDGET_MS = 50000;
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// The model sometimes emits LaTeX backslashes (\frac, \rho, ...) undoubled
+// inside JSON: some break JSON.parse, others silently turn into control
+// characters (\t, \f, \r). Prefer the repaired parse when the direct one
+// looks corrupted.
+function parseModelJson(raw) {
+  const cleaned = raw.trim().replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+  const tryParse = (text) => {
+    try {
+      const obj = JSON.parse(text);
+      return obj && typeof obj.reply === 'string' && obj.reply ? obj : null;
+    } catch (e) {
+      return null;
+    }
+  };
+  const direct = tryParse(cleaned);
+  const fixed = tryParse(cleaned.replace(/(?<!\\)\\(?=[a-zA-Z]{2,})/g, '\\\\'));
+  const looksCorrupted = (obj) => obj && /[\x00-\x1F]/.test((obj.formula || '') + (obj.reply || ''));
+  if (fixed && (!direct || looksCorrupted(direct))) return fixed;
+  return direct || fixed;
+}
+
+async function askOneModel(model, apiKey, requestBody) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+      signal: AbortSignal.timeout(ATTEMPT_TIMEOUT_MS),
+    });
+    if (!resp.ok) {
+      const detail = (await resp.text()).slice(0, 300);
+      return { ok: false, status: resp.status, detail };
+    }
+    const data = await resp.json();
+    const text = data.candidates && data.candidates[0] && data.candidates[0].content &&
+      data.candidates[0].content.parts && data.candidates[0].content.parts[0] &&
+      data.candidates[0].content.parts[0].text;
+    if (!text) return { ok: false, status: 502, detail: 'empty response' };
+    // A cut-off answer comes back as HTTP 200 with truncated JSON.
+    const parsed = parseModelJson(text);
+    if (!parsed) return { ok: false, status: 502, detail: 'truncated or invalid JSON' };
+    return { ok: true, parsed };
+  } catch (err) {
+    return { ok: false, status: 504, detail: String((err && err.name) || err) };
+  }
+}
+
+function sanitizeSvg(svg) {
+  return svg
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<foreignObject[\s\S]*?<\/foreignObject>/gi, '')
+    .replace(/\son\w+\s*=\s*"[^"]*"/gi, '')
+    .replace(/\son\w+\s*=\s*'[^']*'/gi, '')
+    .replace(/(href\s*=\s*["'])\s*javascript:[^"']*/gi, '$1');
 }
 
 module.exports = async function handler(req, res) {
@@ -43,6 +124,12 @@ module.exports = async function handler(req, res) {
 
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
+
+  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket.remoteAddress || 'unknown';
+  if (isRateLimited(ip)) {
+    res.status(429).json({ error: 'Слишком много запросов подряд. Подождите немного и попробуйте снова.' });
     return;
   }
 
@@ -64,17 +151,12 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  const model = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
-  const contents = messages.map((m) => ({
-    role: m.role === 'assistant' ? 'model' : 'user',
-    parts: [{ text: String(m.content || '') }],
-  }));
-
   const requestBody = {
     system_instruction: { parts: [{ text: system }] },
-    contents,
+    contents: messages.map((m) => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: String(m.content || '') }],
+    })),
     generationConfig: {
       temperature: 0.9,
       maxOutputTokens: 2048,
@@ -83,52 +165,31 @@ module.exports = async function handler(req, res) {
     },
   };
 
-  try {
-    const geminiResp = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-    });
+  const started = Date.now();
+  let last = { status: 502, detail: '' };
+  let sawRateLimit = false;
 
-    if (geminiResp.status === 429) {
-      res.status(429).json({ error: 'Сейчас слишком много запросов к нейросети. Подождите немного и попробуйте снова.' });
+  for (const model of MODEL_CHAIN) {
+    if (Date.now() - started > TOTAL_BUDGET_MS) break;
+
+    const result = await askOneModel(model, apiKey, requestBody);
+    if (result.ok) {
+      const answer = result.parsed;
+      if (typeof answer.animation_svg === 'string') answer.animation_svg = sanitizeSvg(answer.animation_svg);
+      res.setHeader('X-Model-Used', model);
+      res.status(200).json({ content: [{ type: 'text', text: JSON.stringify(answer) }] });
       return;
     }
 
-    if (!geminiResp.ok) {
-      const errText = await geminiResp.text();
-      res.status(502).json({ error: 'Нейросеть недоступна, попробуйте позже.', detail: errText.slice(0, 300) });
-      return;
-    }
-
-    const data = await geminiResp.json();
-    const text = data.candidates && data.candidates[0] && data.candidates[0].content &&
-      data.candidates[0].content.parts && data.candidates[0].content.parts[0] &&
-      data.candidates[0].content.parts[0].text;
-
-    if (!text) {
-      res.status(502).json({ error: 'Нейросеть вернула пустой ответ' });
-      return;
-    }
-
-    let safeText = text;
-    try {
-      const parsedAnswer = JSON.parse(text);
-      if (typeof parsedAnswer.animation_svg === 'string') {
-        parsedAnswer.animation_svg = parsedAnswer.animation_svg
-          .replace(/<script[\s\S]*?<\/script>/gi, '')
-          .replace(/<foreignObject[\s\S]*?<\/foreignObject>/gi, '')
-          .replace(/\son\w+\s*=\s*"[^"]*"/gi, '')
-          .replace(/\son\w+\s*=\s*'[^']*'/gi, '')
-          .replace(/(href\s*=\s*["'])\s*javascript:[^"']*/gi, '$1');
-      }
-      safeText = JSON.stringify(parsedAnswer);
-    } catch (e) {
-      // If it isn't valid JSON, pass it through as-is; the front-end handles that case too.
-    }
-
-    res.status(200).json({ content: [{ type: 'text', text: safeText }] });
-  } catch (err) {
-    res.status(500).json({ error: 'Внутренняя ошибка сервера' });
+    console.error(`Model ${model} failed: ${result.status} ${result.detail}`);
+    last = result;
+    if (result.status === 429) sawRateLimit = true;
+    if (result.status >= 500) await sleep(700);
   }
+
+  if (sawRateLimit) {
+    res.status(429).json({ error: 'Сейчас слишком много запросов к нейросети. Подождите немного и попробуйте снова.' });
+    return;
+  }
+  res.status(502).json({ error: 'Нейросеть недоступна, попробуйте позже.', detail: last.detail });
 };
