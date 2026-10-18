@@ -1710,30 +1710,60 @@ Q = Lm (парообразование/конденсация); Q = qm (сгор
 
 Ответ "reply" — не более 2-3 коротких предложений. Пиши только на русском языке. Никогда не добавляй текст до или после JSON. Будь краток везде, где это возможно, — от этого зависит скорость ответа.`;
 
-  // Calls a Vercel serverless function (api/ask.js in this same repo) instead
-  // of talking to Gemini directly from the browser. A direct-from-browser
-  // call was tried first, but Google itself rejects Generative Language API
-  // requests whose *caller* IP is in Russia ("User location is not supported
-  // for the API use") — a policy check on Google's end, independent of any
-  // hosting/network blocking. Routing through a server outside Russia (here,
-  // Vercel, chosen because its network — unlike Netlify's and Cloudflare's —
-  // isn't blocked by Russian ISPs) means Google only ever sees that server's
-  // non-Russian IP, and also lets the API key live server-side again instead
-  // of sitting exposed in the page source.
-  const ASK_ENDPOINT = "https://ponyatnaya-fizika-api.vercel.app/api/ask";
+  // Answers come from a small server-side function (main.js on Deno Deploy,
+  // api/ask.js on Vercel). It must be a server, not the browser: Google
+  // rejects Gemini requests whose caller IP is in Russia, and the API key has
+  // to stay secret. Which hosting platform is reachable from inside Russia
+  // changes from day to day and from ISP to ISP, so the same function runs on
+  // two platforms and the page falls back to the second one when the first
+  // can't be reached. A blocked connection usually just hangs instead of
+  // failing, hence the timeout.
+  const ASK_ENDPOINTS = [
+    "https://ponyatnaya-fizikanew.asyakatop.deno.net/",
+    "https://ponyatnaya-fizika-api.vercel.app/api/ask"
+  ];
+  const ASK_TIMEOUT_MS = 35000;
+  let askEndpoints = ASK_ENDPOINTS.slice();
+
+  async function postToEndpoint(url, bodyJson){
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), ASK_TIMEOUT_MS);
+    try{
+      return await fetch(url, {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: bodyJson,
+        signal: ctrl.signal
+      });
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  // Only a failure to connect (or a timeout) moves on to the next endpoint;
+  // any HTTP response, even an error status, is a real answer and is returned.
+  async function postWithFailover(bodyJson){
+    let lastErr;
+    for(const url of askEndpoints.slice()){
+      try{
+        const res = await postToEndpoint(url, bodyJson);
+        if(url !== askEndpoints[0]) askEndpoints = [url, ...askEndpoints.filter(u => u !== url)];
+        return res;
+      }catch(e){
+        lastErr = e;
+      }
+    }
+    throw lastErr;
+  }
 
   async function callClaude(userText){
     const outgoing = [...history, {role:'user', content: userText}];
     let res;
     try{
-      res = await fetch(ASK_ENDPOINT, {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({
-          system: SYSTEM_PROMPT,
-          messages: outgoing
-        })
-      });
+      res = await postWithFailover(JSON.stringify({
+        system: SYSTEM_PROMPT,
+        messages: outgoing
+      }));
     }catch(networkErr){
       const err = new Error('Не удалось связаться с сервером: ' + networkErr.message);
       err.isNetworkError = true;

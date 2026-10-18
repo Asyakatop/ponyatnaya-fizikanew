@@ -74,7 +74,8 @@ function parseModelJson(raw) {
   const tryParse = (text) => {
     try {
       const obj = JSON.parse(text);
-      return obj && typeof obj.reply === 'string' && obj.reply ? obj : null;
+      // Reject placeholder answers such as "...": the model occasionally returns those.
+      return obj && typeof obj.reply === 'string' && /[A-Za-zА-Яа-яЁё]{3,}/.test(obj.reply) ? obj : null;
     } catch (e) {
       return null;
     }
